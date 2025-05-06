@@ -9,6 +9,7 @@ on:
 env:
   ECR_REGISTRY: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com
   IMAGE_NAME: datadog-news-crawler
+  ACTIONS_STEP_DEBUG: true
 
 jobs:
   build-and-deploy:
