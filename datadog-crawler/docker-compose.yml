@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  api:
+    build: .
+    container_name: bitsfeed-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    command: python -m uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:6.0
+    container_name: bitsfeed-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
