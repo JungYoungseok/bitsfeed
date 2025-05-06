@@ -26,7 +26,7 @@ def extract_bug_fixes(body_text):
 
 def fetch_latest_release():
     headers = {"Accept": "application/vnd.github+json"}
-    response = requests.get(API_URL, headers=headers)
+    response = requests.get(API_URL, headers=headers, timeout=10)
     data = response.json()
 
     latest_tag = data.get("tag_name")
