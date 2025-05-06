@@ -6,7 +6,7 @@ app = FastAPI()
 
 @app.get("/")
 def root():
-    return {"message": "👋 Hello from Datadog News Crawler!"}
+    return {"message": "👋 Hello from Datadog News Crawler!!"}
 
 @app.get("/news")
 def list_news():
