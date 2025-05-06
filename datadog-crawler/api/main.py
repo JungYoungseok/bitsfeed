@@ -4,6 +4,10 @@ from db.mongodb import insert_news, get_all_news
 
 app = FastAPI()
 
+@app.get("/")
+def root():
+    return {"message": "👋 Hello from Datadog News Crawler!"}
+
 @app.get("/news")
 def list_news():
     return get_all_news()
