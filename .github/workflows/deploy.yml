@@ -1,0 +1,47 @@
+name: CI/CD to EKS via Argo CD
+
+on:
+  push:
+    paths:
+      - datadog-crawler/**
+    branches: [main]
+
+env:
+  ECR_REGISTRY: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com
+  IMAGE_NAME: datadog-news-crawler
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::269622523990:role/GitHubActionsECRDeployRole
+        aws-region: ap-northeast-2
+
+    - name: Login to Amazon ECR
+      run: |
+        aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+    - name: Build and push Docker image
+      run: |
+        IMAGE_TAG=$(date +%s)
+        docker build -t $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+    - name: Update deployment.yaml with new image tag
+      run: |
+        sed -i "s|image: .*$|image: $ECR_REGISTRY/$IMAGE_NAME:${{ env.IMAGE_TAG }}|" datadog-crawler/k8s/deployment.yaml
+
+    - name: Commit and push updated deployment.yaml
+      run: |
+        git config user.name "github-actions"
+        git config user.email "ci@github.com"
+        git add datadog-crawler/k8s/deployment.yaml
+        git commit -m "Update image tag to $IMAGE_TAG"
+        git push
