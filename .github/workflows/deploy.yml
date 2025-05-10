@@ -32,12 +32,19 @@ jobs:
       run: |
         aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_REGISTRY
 
-    - name: Build and push Docker image
-      run: |
-        IMAGE_TAG=$(date +%s)
+    - name: Build Docker image (multi-arch)
+    - run: |
         docker buildx create --use || true
-        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG --push ./datadog-crawler
+        IMAGE_TAG=$(date +%s)
+        docker buildx build \
+          --platform linux/amd64 \
+          -t $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG \
+          --load ./datadog-crawler
         echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+    - name: Push Docker image to ECR
+      run: |
+        docker push $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
 
     - name: Update deployment.yaml with new image tag
       run: |
