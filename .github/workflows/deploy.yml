@@ -33,7 +33,7 @@ jobs:
         aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_REGISTRY
 
     - name: Build Docker image (multi-arch)
-    - run: |
+      run: |
         docker buildx create --use || true
         IMAGE_TAG=$(date +%s)
         docker buildx build \
