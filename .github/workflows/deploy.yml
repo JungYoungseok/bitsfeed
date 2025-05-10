@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - datadog-crawler/**
+      - news-frontend/**
     branches: [main]
 
 env:
