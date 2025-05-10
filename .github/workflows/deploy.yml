@@ -41,12 +41,12 @@ jobs:
 
     - name: Update deployment.yaml with new image tag
       run: |
-        sed -i "s|image: .*$|image: $ECR_REGISTRY/$IMAGE_NAME:${{ env.IMAGE_TAG }}|" ./eks_resources/deployment.yaml
+        sed -i "s|image: .*$|image: $ECR_REGISTRY/$IMAGE_NAME:${{ env.IMAGE_TAG }}|" ./eks_resources/k8s/deployment.yaml
 
     - name: Commit and push updated deployment.yaml
       run: |
         git config user.name "github-actions"
         git config user.email "ci@github.com"
-        git add ./eks_resources/deployment.yaml
+        git add ./eks_resources/k8s/deployment.yaml
         git commit -m "Update image tag to $IMAGE_TAG"
         git push
