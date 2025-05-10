@@ -47,6 +47,6 @@ jobs:
       run: |
         git config user.name "github-actions"
         git config user.email "ci@github.com"
-        git add datadog-crawler/k8s/deployment.yaml
+        git add ./eks_resources/deployment.yaml
         git commit -m "Update image tag to $IMAGE_TAG"
         git push
