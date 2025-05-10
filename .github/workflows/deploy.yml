@@ -37,7 +37,7 @@ jobs:
         docker buildx create --use || true
         IMAGE_TAG=$(date +%s)
         docker buildx build \
-          --platform linux/amd64 \
+          --platform linux/arm64 \
           -t $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG \
           --load ./datadog-crawler
         echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
