@@ -4,8 +4,8 @@ from db.mongodb import insert_news, get_all_news
 
 app = FastAPI()
 
-@app.get("/")
-def root():
+@app.get("/hello")
+def hello():
     return {"message": "👋 Hello from Datadog News Crawler!!!!!!!!"}
 
 @app.get("/news")
