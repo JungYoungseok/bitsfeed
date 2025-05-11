@@ -29,3 +29,8 @@ spec:
           value: datadog-news-crawler
         - name: DD_ENV
           value: prod
+        - name: DD_VERSION
+          value: "1.0.3"
+        - name: DD_PROFILING_ENABLED
+          value: true
+

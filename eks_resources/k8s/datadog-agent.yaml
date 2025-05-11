@@ -56,4 +56,10 @@ spec:
         enabled: true
     npm:
       enabled: true
-      
+    liveProcessCollection:
+      enabled: true
+  override:
+    nodeAgent:
+      env:
+        - name: DD_PROCESS_CONFIG_RUN_IN_CORE_AGENT_ENABLED
+          value: "true"
