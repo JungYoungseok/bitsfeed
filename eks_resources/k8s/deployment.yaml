@@ -24,13 +24,13 @@ spec:
               name: datadog-secrets
               key: mongo-uri
         - name: NEXT_PUBLIC_API_URL
-          value: https://k8s-default-datadogn-611e09ccff-13c50379c223eb66.elb.ap-northeast-2.amazonaws.com
+          value: "https://k8s-default-datadogn-611e09ccff-13c50379c223eb66.elb.ap-northeast-2.amazonaws.com"
         - name: DD_SERVICE
           value: datadog-news-crawler
         - name: DD_ENV
           value: prod
         - name: DD_VERSION
-          value: 1.0.3
+          value: "1.0.3"
         - name: DD_PROFILING_ENABLED
-          value: true
+          value: "true"
 
