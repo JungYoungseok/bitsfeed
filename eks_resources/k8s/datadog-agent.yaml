@@ -30,7 +30,7 @@ spec:
               dotnet: "3"
     logCollection:
       enabled: true
-        remoteConfiguration:
+    remoteConfiguration:
       enabled: true
     # Enables Threat Detection
     cws:
