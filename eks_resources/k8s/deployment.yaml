@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: datadog-news-crawler
-        image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/datadog-news-crawler:1746888425
+        image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/datadog-news-crawler:1746958243
         ports:
         - containerPort: 8000
         env:
