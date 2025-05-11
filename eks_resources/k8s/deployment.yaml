@@ -23,4 +23,9 @@ spec:
             secretKeyRef:
               name: datadog-secrets
               key: mongo-uri
-
+       - name: NEXT_PUBLIC_API_URL
+         value: https://k8s-default-datadogn-611e09ccff-13c50379c223eb66.elb.ap-northeast-2.amazonaws.com
+       - name: DD_SERVICE
+         value: datadog-news-crawler
+       - name: DD_ENV
+         value: prod
