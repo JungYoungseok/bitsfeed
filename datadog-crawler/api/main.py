@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from crawler.google_news import fetch_google_news
 from db.mongodb import insert_news, get_all_news
 from fastapi.middleware.cors import CORSMiddleware
-import schedule
-import time
+# import schedule
+# import time
 
 app = FastAPI()
 app.add_middleware(
@@ -13,7 +13,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 @app.get("/hello")
 def hello():
@@ -30,7 +29,7 @@ def crawl_news():
     return {"inserted": len(news_items)}
 
 # 매일 오전 9시에 실행
-schedule.every().day.at("09:00").do(fetch_google_news)
-while True:
-    schedule.run_pending()
-    time.sleep(60)
+# schedule.every().day.at("09:00").do(fetch_google_news)
+# while True:
+#     schedule.run_pending()
+#     time.sleep(60)
