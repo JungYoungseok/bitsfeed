@@ -50,6 +50,8 @@ jobs:
     - name: Update deployment.yaml with new image tag
       run: |
         sed -i "s|image: .*$|image: $ECR_REGISTRY/$IMAGE_NAME:${{ env.IMAGE_TAG }}|" ./eks_resources/k8s/deployment.yaml
+        sed -i "s|\(name: DD_VERSION[[:space:]]*value: \).*|value: \"${{ env.IMAGE_TAG }}\"|" ./eks_resources/k8s/deployment.yaml
+
 
     - name: Commit and push updated deployment.yaml
       run: |
