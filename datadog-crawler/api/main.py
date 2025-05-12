@@ -16,7 +16,7 @@ app.add_middleware(
 
 @app.get("/hello")
 def hello():
-    return {"message": "👋 Hello from Datadog News Crawler!!!!!!!"}
+    return {"message": "👋 Hello from Datadog News Crawler!!"}
 
 @app.get("/news")
 def list_news():
