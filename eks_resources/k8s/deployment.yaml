@@ -33,4 +33,31 @@ spec:
           value: "1.0.3"
         - name: DD_PROFILING_ENABLED
           value: "true"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
 
+      - name: news-frontend
+        image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/news-frontend:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: DD_SERVICE
+          value: news-frontend
+        - name: DD_ENV
+          value: prod
+        - name: DD_VERSION
+          value: "1.0.0"
+        - name: DD_PROFILING_ENABLED
+          value: "true"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "300m"
+            memory: "256Mi"

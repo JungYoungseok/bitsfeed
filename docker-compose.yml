@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./datadog-crawler
+    container_name: datadog-crawler
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+    networks:
+      - bitsfeed-net
+
+  frontend:
+    build:
+      context: ./news-frontend
+    container_name: datadog-ui
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://datadog-crawler:8000
+      - MONGO_URI=mongodb://mongo:27017
+    networks:
+      - bitsfeed-net
+    depends_on:
+      - backend
+
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - bitsfeed-net
+    volumes:
+      - mongo-data:/data/db
+
+networks:
+  bitsfeed-net:
+    driver: bridge
+
+volumes:
+  mongo-data: 
