@@ -11,7 +11,6 @@ env:
   ECR_REGISTRY: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com
   IMAGE_NAME: datadog-news-crawler
   IMAGE_NAME_FRONTEND: news-frontend
-  IMAGE_TAG: ${{ github.sha }}
   ACTIONS_STEP_DEBUG: false
 
 jobs:
@@ -30,6 +29,9 @@ jobs:
       with:
         role-to-assume: arn:aws:iam::269622523990:role/GitHubActionsECRDeployRole
         aws-region: ap-northeast-2
+
+    - name: Set IMAGE_TAG as short SHA
+      run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
     - name: Login to Amazon ECR
       run: |
@@ -56,7 +58,7 @@ jobs:
       run: |
         sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME:\).*|image: $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG|" ./eks_resources/k8s/deployment.yaml
         sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:$IMAGE_TAG|" ./eks_resources/k8s/deployment.yaml
-        sed -i '/name: DD_VERSION/{n;s/value: .*/value: "$IMAGE_TAG"/}' ./eks_resources/k8s/deployment.yaml
+        sed -i "/name: DD_VERSION/{n;s/value: .*/value: $IMAGE_TAG/}" ./eks_resources/k8s/deployment.yaml
 
     - name: Commit and push updated deployment.yaml
       run: |
