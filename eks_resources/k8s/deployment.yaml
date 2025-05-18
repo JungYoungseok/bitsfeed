@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: datadog-news-crawler
-        image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/datadog-news-crawler:982fd7b
+        image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/datadog-news-crawler:6b3358a
         ports:
         - containerPort: 8000
         env:
@@ -30,7 +30,7 @@ spec:
         - name: DD_ENV
           value: prod
         - name: DD_VERSION
-          value: 982fd7b
+          value: 6b3358a
         - name: DD_PROFILING_ENABLED
           value: "true"
         resources:
@@ -42,7 +42,7 @@ spec:
             memory: "512Mi"
 
       - name: news-frontend
-        image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/news-frontend:982fd7b
+        image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/news-frontend:6b3358a
         ports:
         - containerPort: 3000
         env:
@@ -51,7 +51,7 @@ spec:
         - name: DD_ENV
           value: prod
         - name: DD_VERSION
-          value: 982fd7b
+          value: 6b3358a
         - name: DD_PROFILING_ENABLED
           value: "true"
         - name: NEXT_PUBLIC_API_URL
