@@ -1,7 +1,7 @@
 import { NewsItem } from "@/types/news";
 
 export default async function HomePage() {
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://datadog-news-crawler-service:8000";
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   const res = await fetch(`${apiBaseUrl}/news`, {
     // 중요: SSR fetch로 하기 위해 다음 옵션 필수
