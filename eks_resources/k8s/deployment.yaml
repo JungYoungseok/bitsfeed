@@ -9,6 +9,8 @@ spec:
       app: datadog-news-crawler
   template:
     metadata:
+      annotations:
+        admission.datadoghq.com/enabled: "true"
       labels:
         app: datadog-news-crawler
     spec:

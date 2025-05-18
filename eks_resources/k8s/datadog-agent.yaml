@@ -18,6 +18,12 @@ spec:
         enabled: true
         targets:
           - name: "default-target"
+            namespaceSelector:
+              matchNames:
+                - default  # news-frontend, crawler가 있는 namespace
+            podSelector:
+              matchLabels:
+                app: datadog-news-crawler
             ddTraceVersions:
               java: "1"
               python: "3.7.0"
