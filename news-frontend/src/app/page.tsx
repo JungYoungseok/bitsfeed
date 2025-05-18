@@ -15,6 +15,7 @@ export default async function HomePage() {
       <h1 className="text-2xl font-bold mb-6">📰 Datadog 뉴스 피드</h1>
       <ul className="space-y-4">
         {news.map((item, idx) => (
+          // no-dd-sa
           <li key={idx} className="p-4 border rounded-lg shadow hover:bg-gray-50">
             <p className="text-sm text-gray-500">
               {new Date(item.published).toLocaleString()}
