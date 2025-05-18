@@ -19,7 +19,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://datadog-crawler:8000
+      - NEWS_API_URL=http://datadog-crawler:8000
       - MONGO_URI=mongodb://mongo:27017
     networks:
       - bitsfeed-net
