@@ -9,10 +9,11 @@ spec:
       app: datadog-news-crawler
   template:
     metadata:
-      annotations:
-        admission.datadoghq.com/enabled: "true"
       labels:
         app: datadog-news-crawler
+        admission.datadoghq.com/enabled: "true"
+        admission.datadoghq.com/python-lib.version: v3.7.0
+        admission.datadoghq.com/js-lib.version: v5.52.0
     spec:
       containers:
       - name: datadog-news-crawler
@@ -33,6 +34,15 @@ spec:
           value: 6b3358a
         - name: DD_PROFILING_ENABLED
           value: "true"
+        - name: DD_LOGS_INJECTION
+          value: "true"
+        - name: DD_APPSEC_ENABLED
+          value: "true"
+        - name: DD_IAST_ENABLED
+          value: "true"
+        - name: DD_APPSEC_SCA_ENABLED
+          value: "true"
+
         resources:
           requests:
             cpu: "100m"
@@ -55,7 +65,15 @@ spec:
         - name: DD_PROFILING_ENABLED
           value: "true"
         - name: NEXT_PUBLIC_API_URL
-          value: http://localhost:8000       
+          value: http://localhost:8000
+        - name: DD_LOGS_INJECTION
+          value: "true"
+        - name: DD_APPSEC_ENABLED
+          value: "true"
+        - name: DD_IAST_ENABLED
+          value: "true"
+        - name: DD_APPSEC_SCA_ENABLED
+          value: "true"
         resources:
           requests:
             cpu: "100m"
