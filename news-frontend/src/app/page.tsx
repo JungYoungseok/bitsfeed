@@ -20,11 +20,16 @@ export default function HomePage() {
   return (
     <main className="max-w-3xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">📰 Datadog 뉴스 피드</h1>
+      <p className="mb-6">
+        👉 <a href="/healthcheck" className="text-blue-600 hover:underline">Healthcheck 페이지로 이동</a>
+      </p>
+
       {loading ? (
         <p>Loading...</p>
       ) : (
         <ul className="space-y-4">
           {news.map((item, idx) => (
+            // no-dd-sa
             <li key={idx} className="p-4 border rounded-lg shadow hover:bg-gray-50">
               <p className="text-sm text-gray-500">{new Date(item.published).toLocaleString()}</p>
               <a
