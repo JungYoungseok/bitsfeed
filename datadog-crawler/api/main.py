@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from crawler.google_news import fetch_google_news
 from db.mongodb import insert_news, get_all_news
 from fastapi.middleware.cors import CORSMiddleware
+from crawler.scheduler import start_scheduler
 # import schedule
 # import time
 
@@ -13,6 +14,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+async def startup_event():
+    start_scheduler()  # ✅ 매시간 자동 실행 등록
 
 @app.get("/hello")
 def hello():
