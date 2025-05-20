@@ -11,3 +11,6 @@ def start_scheduler():
     scheduler = BackgroundScheduler()
     scheduler.add_job(crawl_and_store, 'interval', hours=1)
     scheduler.start()
+
+    print("[INIT] App started — running initial crawl...")
+    crawl_and_store()

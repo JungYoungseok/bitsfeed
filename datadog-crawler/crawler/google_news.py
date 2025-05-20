@@ -6,7 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 import urllib.parse
-
+from dateutil import parser
 
 def fetch_google_news():
     query = "Datadog"
@@ -16,10 +16,11 @@ def fetch_google_news():
     print(f"\n[Datadog 뉴스 업데이트 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}]")
     
     results = []
-    for entry in feed.entries[:5]:  # 최근 5개만 출력
+    for entry in feed.entries[:10]:  # 최근 10개만 출력
         title = entry.title
         link = entry.link
-        published = entry.published
+        published = parser.parse(entry.published)
+
         print(f"{published} | {title} | {link}")
         results.append({
             "published": published,
