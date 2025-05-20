@@ -64,7 +64,7 @@ spec:
           value: 075b5ee
         - name: DD_PROFILING_ENABLED
           value: "true"
-        - name: NEXT_PUBLIC_API_URL
+        - name: NEWS_API_URL
           value: http://localhost:8000
         - name: DD_LOGS_INJECTION
           value: "true"
