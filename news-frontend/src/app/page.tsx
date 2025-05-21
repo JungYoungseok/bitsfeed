@@ -13,8 +13,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const apiBaseUrl = process.env.NEWS_API_URL || "http://localhost:8000";
-      const res = await fetch(`${apiBaseUrl}/news`, { cache: "no-store" });
+      const res = await fetch("/api/news", { cache: "no-store" });
       const data = await res.json();
       setNews(data);
     };
