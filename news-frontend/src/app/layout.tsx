@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <DatadogRUMWrapper /> {/* ✅ 실제 실행 */}
+        <DatadogRUMWrapper />
         {children}
       </body>
     </html>
