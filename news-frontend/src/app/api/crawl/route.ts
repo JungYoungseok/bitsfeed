@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
     const data = await res.json();
     return NextResponse.json(data);
   } catch (err) {
+    // no-dd-sa
     console.error('API /crawl POST error:', err);
     return NextResponse.json({ error: 'Failed to post crawl request' }, { status: 500 });
   }

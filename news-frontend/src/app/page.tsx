@@ -10,7 +10,6 @@ export default function HomePage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const pageSize = 5;
-
   useEffect(() => {
     const fetchData = async () => {
       const res = await fetch("/api/news", { cache: "no-store" });
@@ -66,6 +65,7 @@ export default function HomePage() {
 
       <ul className="space-y-4">
         {paginated.map((item, idx) => (
+          // no-dd-sa
           <li
             key={idx}
             className={`p-4 border rounded-xl shadow-md transition hover:shadow-lg ${
