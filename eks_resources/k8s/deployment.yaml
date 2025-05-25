@@ -74,8 +74,6 @@ spec:
           value: "true"
         - name: DD_APPSEC_SCA_ENABLED
           value: "true"
-        - name: DD_TRACE_DEBUG
-          value: "true"
         - name: DD_APM_INSTRUMENTATION_DEBUG
           value: "true"
         resources:
