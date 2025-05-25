@@ -41,8 +41,6 @@ spec:
           value: "true"
         - name: DD_APPSEC_SCA_ENABLED
           value: "true"
-        - name: DD_TRACE_DEBUG
-          value: "true"
         resources:
           requests:
             cpu: "100m"
