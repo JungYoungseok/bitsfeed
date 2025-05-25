@@ -3,7 +3,9 @@ kind: Deployment
 metadata:
   name: datadog-news-crawler
 spec:
-  replicas: 1
+  replicas: 2
+  strategy:
+    type: RollingUpdate
   selector:
     matchLabels:
       app: datadog-news-crawler
@@ -14,6 +16,13 @@ spec:
       labels:
         app: datadog-news-crawler
     spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: "kubernetes.io/hostname"
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: datadog-news-crawler
       containers:
       - name: datadog-news-crawler
         image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/datadog-news-crawler:b49a021
