@@ -16,98 +16,70 @@ env:
   ACTIONS_STEP_DEBUG: false
 
 jobs:
-  setup:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    
     permissions:
       id-token: write
       contents: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Set IMAGE_TAG as short SHA
-        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::269622523990:role/GitHubActionsECRDeployRole
+        aws-region: ap-northeast-2
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::269622523990:role/GitHubActionsECRDeployRole
-          aws-region: ap-northeast-2
+    - name: Set IMAGE_TAG as short SHA
+      run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      - name: Login to Amazon ECR
-        run: |
-          aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_REGISTRY
-    
-  build-backend:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set IMAGE_TAG as short SHA
-        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
-      - name: Build and push backend image
-        run: |
-          docker buildx build \
-            --platform linux/arm64 \
-            --cache-from=type=gha \
-            --cache-to=type=gha,mode=max \
-            -t $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG \
-            --push ./datadog-crawler
+    - name: Login to Amazon ECR
+      run: |
+        aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_REGISTRY
 
-  build-consumer:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set IMAGE_TAG as short SHA
-        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+    - name: Build and push backend image (datadog-news-crawler)
+      run: |
+        docker buildx create --use || true
+        docker buildx build \
+          --platform linux/arm64 \
+          -t $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG \
+          --load ./datadog-crawler
+        docker push $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
 
-      - name: Build and push consumer image
-        run: |
-          docker buildx build \
-            --platform linux/arm64 \
-            --cache-from=type=gha \
-            --cache-to=type=gha,mode=max \
-            -t $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG \
-            --push ./news-consumer
+    - name: Build and push consumer image (news-consumer)
+      run: |
+        docker buildx build \
+          --platform linux/arm64 \
+          -t $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG \
+          --load ./news-consumer
+        docker push $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG
 
-  build-frontend:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set IMAGE_TAG as short SHA
-        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+    - name: Build and push frontend image (news-frontend)
+      run: |
+        docker buildx build \
+          --platform linux/arm64 \
+          -t $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:$IMAGE_TAG \
+          --load ./news-frontend
+        docker push $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:$IMAGE_TAG
 
-      - name: Build and push frontend image
-        run: |
-          docker buildx build \
-            --platform linux/arm64 \
-            --cache-from=type=gha \
-            --cache-to=type=gha,mode=max \
-            -t $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:$IMAGE_TAG \
-            --push ./news-frontend
+    - name: Update consumer-summary.yaml with new image tag
+      run: |
+        sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG|" ./eks_resources/k8s/consumer-summary.yaml
+        sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG|" ./eks_resources/k8s/consumer-summary.yaml
+        sed -i "/name: DD_VERSION/{n;s/value: .*/value: $IMAGE_TAG/}" ./eks_resources/k8s/consumer-summary.yaml        
 
-  update-deployments:
-    needs: [build-backend, build-consumer, build-frontend]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set IMAGE_TAG as short SHA
-        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+    - name: Update deployment.yaml with new image tags
+      run: |
+        sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME:\).*|image: $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG|" ./eks_resources/k8s/deployment.yaml
+        sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:$IMAGE_TAG|" ./eks_resources/k8s/deployment.yaml
+        sed -i "/name: DD_VERSION/{n;s/value: .*/value: $IMAGE_TAG/}" ./eks_resources/k8s/deployment.yaml
 
-      - name: Update deployment files with new image tags
-        run: |
-          sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME:\).*|image: $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG|" ./eks_resources/k8s/deployment.yaml
-          sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:$IMAGE_TAG|" ./eks_resources/k8s/deployment.yaml
-          sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG|" ./eks_resources/k8s/consumer-summary.yaml
-          sed -i "/name: DD_VERSION/{n;s/value: .*/value: $IMAGE_TAG/}" ./eks_resources/k8s/deployment.yaml
-          sed -i "/name: DD_VERSION/{n;s/value: .*/value: $IMAGE_TAG/}" ./eks_resources/k8s/consumer-summary.yaml
-
-      - name: Commit and push updated deployment files
-        run: |
-          git config user.name "github-actions"
-          git config user.email "ci@github.com"
-          git add ./eks_resources/k8s/*.yaml
-          git commit -m "Update image tag to $IMAGE_TAG"
-          git push
+    - name: Commit and push updated deployment.yaml
+      run: |
+        git config user.name "github-actions"
+        git config user.email "ci@github.com"
+        git add ./eks_resources/k8s/deployment.yaml
+        git commit -m "Update image tag to $IMAGE_TAG"
+        git push
