@@ -48,7 +48,7 @@ jobs:
           --load ./datadog-crawler
         docker push $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
 
-    - name: Build and push consumer image (news-consumer)  # ✅ 추가
+    - name: Build and push consumer image (news-consumer)
       run: |
         docker buildx build \
           --platform linux/arm64 \
@@ -66,7 +66,7 @@ jobs:
 
     - name: Update consumer-summary.yaml with new image tag
       run: |
-        sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG|" ./eks_resources/consumer-summary.yaml
+        sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG|" ./eks_resources/k8s/consumer-summary.yaml
 
     - name: Update deployment.yaml with new image tags
       run: |
