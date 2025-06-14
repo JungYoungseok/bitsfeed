@@ -97,6 +97,7 @@ jobs:
       - name: Update consumer-summary.yaml with new image tag
         run: |
           sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:${{ env.IMAGE_TAG }}|" ./eks_resources/k8s/consumer-summary.yaml
+          sed -i "/name: DD_VERSION/{n;s/value: .*/value: ${{ env.IMAGE_TAG }}/}" ./eks_resources/k8s/consumer-summary.yaml
 
       - name: Update deployment.yaml with new image tags
         run: |

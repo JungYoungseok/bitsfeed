@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: consumer                 
-          image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/news-consumer:latest
+          image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/news-consumer:00704e3
           env:
             - name: OPENAI_API_KEY
               valueFrom:
@@ -29,6 +29,22 @@ spec:
                   key: mongo-uri
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: kafka.kafka.svc.cluster.local:9092
+            - name: DD_ENV
+              value: prod
+            - name: DD_VERSION
+              value: "00704e3"
+            - name: DD_PROFILING_ENABLED
+              value: "true"
+            - name: DD_LOGS_INJECTION
+              value: "true"
+            - name: DD_APPSEC_ENABLED
+              value: "true"
+            - name: DD_IAST_ENABLED
+              value: "true"
+            - name: DD_APPSEC_SCA_ENABLED
+              value: "true"
+
+
           resources:
             requests:
               cpu: 100m
