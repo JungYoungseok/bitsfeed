@@ -1,12 +1,21 @@
 from fastapi import FastAPI
+import asyncio
 from crawler.google_news import fetch_google_news
 from db.mongodb import insert_news, get_all_news
 from fastapi.middleware.cors import CORSMiddleware
 from crawler.scheduler import start_scheduler
-# import schedule
-# import time
+from api.test_consume import router as test_consume_router
+#from kafka.consumer_summary import run_summary_consumer
 
-app = FastAPI()
+
+try:
+    from fastapi import FastAPI
+    app = FastAPI()
+except Exception as e:
+    print("❌ FastAPI 로딩 실패:", e)
+    raise e
+
+#app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # or ["http://localhost:3000"]
@@ -14,10 +23,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(test_consume_router)
 
-@app.on_event("startup")
-async def startup_event():
-    start_scheduler()  # ✅ 매시간 자동 실행 등록
+
+# @app.on_event("startup")
+# async def startup_event():
+#     start_scheduler()  # ✅ 매시간 자동 실행 등록
+#     asyncio.create_task(run_summary_consumer())  # ✅ Kafka consumer 실행
 
 @app.get("/hello")
 def hello():

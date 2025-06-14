@@ -1,8 +1,7 @@
-// src/types/news.ts
-export interface NewsItem {
-    published: string;
-    title: string;
-    link: string;
-    scraped_at: string;
-  }
-  
+export type NewsItem = {
+  title: string;
+  link: string;
+  published: string;
+  summary_ko?: string;
+  impact_ko?: string;
+};

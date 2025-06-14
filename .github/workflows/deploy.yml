@@ -5,12 +5,14 @@ on:
     paths:
       - datadog-crawler/**
       - news-frontend/**
+      - news-consumer/**
     branches: [main]
 
 env:
   ECR_REGISTRY: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com
   IMAGE_NAME: datadog-news-crawler
   IMAGE_NAME_FRONTEND: news-frontend
+  IMAGE_NAME_CONSUMER: news-consumer
   ACTIONS_STEP_DEBUG: false
 
 jobs:
@@ -46,6 +48,14 @@ jobs:
           --load ./datadog-crawler
         docker push $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
 
+    - name: Build and push consumer image (news-consumer)  # ✅ 추가
+      run: |
+        docker buildx build \
+          --platform linux/arm64 \
+          -t $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG \
+          --load ./news-consumer
+        docker push $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG
+
     - name: Build and push frontend image (news-frontend)
       run: |
         docker buildx build \
@@ -53,6 +63,10 @@ jobs:
           -t $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:$IMAGE_TAG \
           --load ./news-frontend
         docker push $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:$IMAGE_TAG
+
+    - name: Update consumer-summary.yaml with new image tag
+      run: |
+        sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG|" ./eks_resources/consumer-summary.yaml
 
     - name: Update deployment.yaml with new image tags
       run: |

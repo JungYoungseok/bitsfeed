@@ -8,3 +8,6 @@ pymongo
 apscheduler
 python-dotenv
 python-dateutil
+confluent_kafka
+openai
+ddtrace

@@ -85,6 +85,21 @@ export default function HomePage() {
             >
               {item.title}
             </a>
+
+            {/* ✅ 한글 요약 */}
+            {item.summary_ko && (
+              <p className="text-sm text-gray-800 mb-2">
+                <strong>요약:</strong> {item.summary_ko}
+              </p>
+            )}
+
+            {/* ✅ 시장 영향 */}
+            {item.impact_ko && (
+              <p className="text-sm text-gray-600">
+                <strong>시장 영향:</strong> {item.impact_ko}
+              </p>
+            )}
+
           </li>
         ))}
       </ul>
