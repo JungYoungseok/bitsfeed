@@ -18,6 +18,9 @@ env:
 jobs:
   setup:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     outputs:
       IMAGE_TAG: ${{ steps.vars.outputs.IMAGE_TAG }}
     steps:

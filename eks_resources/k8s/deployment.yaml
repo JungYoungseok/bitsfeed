@@ -39,7 +39,7 @@ spec:
         - name: DD_ENV
           value: prod
         - name: DD_VERSION
-          value: 00704e3
+          value: "00704e3"
         - name: DD_PROFILING_ENABLED
           value: "true"
         - name: DD_LOGS_INJECTION
@@ -68,7 +68,7 @@ spec:
         - name: DD_ENV
           value: prod
         - name: DD_VERSION
-          value: 00704e3
+          value: "00704e3"
         - name: DD_PROFILING_ENABLED
           value: "true"
         - name: NEWS_API_URL
