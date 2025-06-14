@@ -18,100 +18,82 @@ env:
 jobs:
   setup:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
     outputs:
-      IMAGE_TAG: ${{ steps.vars.outputs.IMAGE_TAG }}
+      image_tag: ${{ steps.tag.outputs.image_tag }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Set IMAGE_TAG as short SHA
-        id: vars
-        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::269622523990:role/GitHubActionsECRDeployRole
-          aws-region: ap-northeast-2
-
-      - name: Login to Amazon ECR
-        run: |
-          aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_REGISTRY
+        id: tag
+        run: echo "image_tag=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
 
   build-backend:
-    needs: setup
     runs-on: ubuntu-latest
+    needs: setup
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Build and push backend image (datadog-news-crawler)
+      - name: Login to Amazon ECR
+        run: aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+      - name: Build and push backend image
         run: |
           docker buildx create --use || true
           docker buildx build \
             --platform linux/arm64 \
-            --cache-from=type=gha \
-            --cache-to=type=gha,mode=max \
-            -t $ECR_REGISTRY/$IMAGE_NAME:${{ env.IMAGE_TAG }} \
+            -t $ECR_REGISTRY/$IMAGE_NAME:${{ needs.setup.outputs.image_tag }} \
             --push ./datadog-crawler
 
   build-consumer:
-    needs: setup
     runs-on: ubuntu-latest
+    needs: setup
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Build and push consumer image (news-consumer)
+      - name: Login to Amazon ECR
+        run: aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+      - name: Build and push consumer image
         run: |
           docker buildx build \
             --platform linux/arm64 \
-            --cache-from=type=gha \
-            --cache-to=type=gha,mode=max \
-            -t $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:${{ env.IMAGE_TAG }} \
+            -t $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:${{ needs.setup.outputs.image_tag }} \
             --push ./news-consumer
 
   build-frontend:
-    needs: setup
     runs-on: ubuntu-latest
+    needs: setup
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Build and push frontend image (news-frontend)
+      - name: Login to Amazon ECR
+        run: aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+      - name: Build and push frontend image
         run: |
           docker buildx build \
             --platform linux/arm64 \
-            --cache-from=type=gha \
-            --cache-to=type=gha,mode=max \
-            -t $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:${{ env.IMAGE_TAG }} \
+            -t $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:${{ needs.setup.outputs.image_tag }} \
             --push ./news-frontend
 
   update-deployments:
-    needs: [build-backend, build-consumer, build-frontend]
     runs-on: ubuntu-latest
+    needs: [build-backend, build-consumer, build-frontend]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Update consumer-summary.yaml with new image tag
+      - name: Update manifests with new image tags
         run: |
-          sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:${{ env.IMAGE_TAG }}|" ./eks_resources/k8s/consumer-summary.yaml
-          sed -i "/name: DD_VERSION/{n;s/value: .*/value: ${{ env.IMAGE_TAG }}/}" ./eks_resources/k8s/consumer-summary.yaml
+          IMAGE_TAG=${{ needs.setup.outputs.image_tag }}
+          sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME:\).*|image: $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG|" ./eks_resources/k8s/deployment.yaml
+          sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:$IMAGE_TAG|" ./eks_resources/k8s/deployment.yaml
+          sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG|" ./eks_resources/k8s/consumer-summary.yaml
 
-      - name: Update deployment.yaml with new image tags
-        run: |
-          sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME:\).*|image: $ECR_REGISTRY/$IMAGE_NAME:${{ env.IMAGE_TAG }}|" ./eks_resources/k8s/deployment.yaml
-          sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:${{ env.IMAGE_TAG }}|" ./eks_resources/k8s/deployment.yaml
-          sed -i "/name: DD_VERSION/{n;s/value: .*/value: ${{ env.IMAGE_TAG }}/}" ./eks_resources/k8s/deployment.yaml
-
-      - name: Commit and push updated deployment.yaml
+      - name: Commit and push updated deployment manifests
         run: |
           git config user.name "github-actions"
           git config user.email "ci@github.com"
-          git add ./eks_resources/k8s/
-          git commit -m "Update image tag to ${{ env.IMAGE_TAG }}"
+          git add ./eks_resources/k8s/*.yaml
+          git commit -m "Update image tags to $IMAGE_TAG"
           git push
