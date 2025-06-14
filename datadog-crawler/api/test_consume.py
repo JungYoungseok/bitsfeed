@@ -31,7 +31,7 @@ def test_consume_kafka():
         payload = json.loads(msg.value().decode('utf-8'))
         consumer.close()
         return {
-            "message": "✅ Successfully consumed 1 item from Kafka!!",
+            "message": "✅ Successfully consumed 1 item from Kafka!!!",
             "data": payload
         }
     except Exception as e:
