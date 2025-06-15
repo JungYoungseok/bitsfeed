@@ -36,6 +36,8 @@ spec:
               value: prod
             - name: DD_VERSION
               value: "00704e3"
+            - name: DD_DATA_STREAMS_ENABLED
+              value: "true"
             - name: DD_PROFILING_ENABLED
               value: "true"
             - name: DD_LOGS_INJECTION

@@ -47,6 +47,8 @@ spec:
           value: 46827d4
         - name: DD_PROFILING_ENABLED
           value: "true"
+        - name: DD_DATA_STREAMS_ENABLED
+          value: "true"
         - name: DD_LOGS_INJECTION
           value: "true"
         - name: DD_APPSEC_ENABLED
