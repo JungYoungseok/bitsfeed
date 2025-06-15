@@ -33,7 +33,7 @@ spec:
             - name: DD_LOGS_INJECTION
               value: "true"
             - name: DD_GIT_REPOSITORY_URL
-              value: github.com/jungyoungseok/bitsfeed
+              value: "github.com/jungyoungseok/bitsfeed"
             - name: DD_APPSEC_ENABLED
               value: "true"
             - name: DD_IAST_ENABLED
