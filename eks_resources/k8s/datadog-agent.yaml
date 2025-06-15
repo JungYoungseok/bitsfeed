@@ -20,12 +20,6 @@ spec:
         enabled: true
         targets:
           - name: "default-target"
-            namespaceSelector:
-              matchNames:
-                - default
-            podSelector:
-              matchLabels:
-                app: datadog-news-crawler
             ddTraceVersions:
               java: "1"
               python: "3"
