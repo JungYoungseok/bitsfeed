@@ -98,22 +98,23 @@ services:
     depends_on:
       - zookeeper
 
-  # datadog:
-  #   image: gcr.io/datadoghq/agent:latest
-  #   container_name: datadog-agent
-  #   environment:
-  #     - DD_APM_ENABLED=true
-  #     - DD_LOGS_ENABLED=true
-  #     - DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true
-  #     - DD_HOSTNAME=bitsfeed-local
-  #     - DD_ENV=dev
-  #     - DD_SERVICE=bitsfeed-api
-  #     - DD_LOG_LEVEL=ERROR
-  #   ports:
-  #     - "8126:8126"     # APM
-  #     - "8125:8125/udp" # DogStatsD
-  #   networks:
-  #     - bitsfeed-net
+  datadog:
+    image: gcr.io/datadoghq/agent:latest
+    container_name: datadog-agent
+    environment:
+      - DD_API_KEY=${DD_API_KEY}
+      - DD_APM_ENABLED=true
+      - DD_LOGS_ENABLED=true
+      - DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true
+      - DD_HOSTNAME=bitsfeed-local
+      - DD_ENV=dev
+      - DD_SERVICE=bitsfeed-api
+      - DD_LOG_LEVEL=ERROR
+    ports:
+      - "8126:8126"     # APM
+      - "8125:8125/udp" # DogStatsD
+    networks:
+      - bitsfeed-net
 networks:
   bitsfeed-net:
     driver: bridge
