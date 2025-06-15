@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: news-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: news-frontend
+  template:
+    metadata:
+      annotations:
+        admission.datadoghq.com/enabled: "true"
+      labels:
+        app: news-frontend
+    spec:
+      containers:
+        - name: news-frontend
+          image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/news-frontend:7cd49ce
+          ports:
+          - containerPort: 3000
+          env:
+            - name: DD_SERVICE
+              value: news-frontend
+            - name: DD_ENV
+              value: prod
+            - name: DD_VERSION
+              value: 7cd49ce
+            - name: DD_PROFILING_ENABLED
+              value: "true"
+            - name: NEWS_API_URL
+              value: "http://datadog-crawler:8000"
+            - name: DD_LOGS_INJECTION
+              value: "true"
+            - name: DD_GIT_REPOSITORY_URL
+              value: github.com/jungyoungseok/bitsfeed
+            - name: DD_APPSEC_ENABLED
+              value: "true"
+            - name: DD_IAST_ENABLED
+              value: "true"
+            - name: DD_APPSEC_SCA_ENABLED
+              value: "true"
+            - name: DD_APM_INSTRUMENTATION_DEBUG
+              value: "true"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "300m"
+              memory: "256Mi"

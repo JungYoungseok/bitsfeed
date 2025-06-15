@@ -67,13 +67,16 @@ jobs:
     - name: Update consumer-summary.yaml with new image tag
       run: |
         sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG|" ./eks_resources/k8s/consumer-summary.yaml
-        sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG|" ./eks_resources/k8s/consumer-summary.yaml
-        sed -i "/name: DD_VERSION/{n;s/value: .*/value: $IMAGE_TAG/}" ./eks_resources/k8s/consumer-summary.yaml        
+        sed -i "/name: DD_VERSION/{n;s/value: .*/value: $IMAGE_TAG/}" ./eks_resources/k8s/consumer-summary.yaml
 
+    - name: Update news-frontend.yaml with new image tag
+      run: |
+        sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG|" ./eks_resources/k8s/news-frontend.yaml
+        sed -i "/name: DD_VERSION/{n;s/value: .*/value: $IMAGE_TAG/}" ./eks_resources/k8s/news-frontend.yaml
+  
     - name: Update deployment.yaml with new image tags
       run: |
         sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME:\).*|image: $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG|" ./eks_resources/k8s/deployment.yaml
-        sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:$IMAGE_TAG|" ./eks_resources/k8s/deployment.yaml
         sed -i "/name: DD_VERSION/{n;s/value: .*/value: $IMAGE_TAG/}" ./eks_resources/k8s/deployment.yaml
 
     - name: Commit and push updated deployment.yaml
