@@ -28,7 +28,10 @@ spec:
                   name: datadog-secrets
                   key: mongo-uri
             - name: KAFKA_BOOTSTRAP_SERVERS
-              value: kafka.kafka.svc.cluster.local:9092
+              valueFrom:
+                secretKeyRef:
+                  name: datadog-secrets
+                  key: kafka-uri
             - name: DD_ENV
               value: prod
             - name: DD_VERSION
