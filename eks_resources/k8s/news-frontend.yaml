@@ -29,7 +29,7 @@ spec:
             - name: DD_PROFILING_ENABLED
               value: "true"
             - name: NEWS_API_URL
-              value: "http://datadog-crawler:8000"
+              value: "http://datadog-news-crawler:8000"
             - name: DD_LOGS_INJECTION
               value: "true"
             - name: DD_GIT_REPOSITORY_URL
