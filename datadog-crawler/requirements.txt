@@ -11,3 +11,14 @@ python-dateutil
 confluent_kafka
 openai
 ddtrace
+# 키워드 분석 및 시각화용 라이브러리
+konlpy
+scikit-learn
+wordcloud
+plotly
+networkx
+matplotlib
+seaborn
+pandas
+numpy
+collections-extended

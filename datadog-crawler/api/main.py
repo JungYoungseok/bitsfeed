@@ -5,6 +5,8 @@ from db.mongodb import insert_news, get_all_news
 from fastapi.middleware.cors import CORSMiddleware
 from crawler.scheduler import start_scheduler
 from api.test_consume import router as test_consume_router
+from api.analytics import router as analytics_router
+from api.visualization import router as visualization_router
 from crawler.rss import fetch_datadog_rss
 
 try:
@@ -23,6 +25,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(test_consume_router)
+app.include_router(analytics_router, prefix="/analytics")
+app.include_router(visualization_router, prefix="/viz")
 
 @app.get("/hello")
 def hello():

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { NewsItem } from "@/types/news";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function HomePage() {
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -42,14 +43,34 @@ export default function HomePage() {
 
   return (
     <main className="max-w-3xl mx-auto p-6">
-      <div className="flex items-center gap-4 mb-6">
-        <Image
-          src="/datadog-bits.png"
-          alt="Datadog Bits"
-          width={40}
-          height={40}
-        />
-        <h1 className="text-3xl font-bold text-purple-700">Datadog 뉴스 피드</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <Image
+            src="/datadog-bits.png"
+            alt="Datadog Bits"
+            width={40}
+            height={40}
+          />
+          <h1 className="text-3xl font-bold text-purple-700">Datadog 뉴스 피드</h1>
+        </div>
+        
+        {/* 키워드 분석 대시보드 링크 */}
+        <div className="flex gap-2">
+          <Link
+            href="/api/proxy?type=viz&path=dashboard"
+            target="_blank"
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm flex items-center gap-2"
+          >
+            🔍 키워드 분석
+          </Link>
+          <Link
+            href="/api/proxy?type=viz&path=simple"
+            target="_blank"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm flex items-center gap-2"
+          >
+            📊 간단 차트
+          </Link>
+        </div>
       </div>
 
       <input
