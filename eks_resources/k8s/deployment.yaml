@@ -25,7 +25,7 @@ spec:
               app: datadog-news-crawler
       containers:
       - name: datadog-news-crawler
-        image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/datadog-news-crawler:9a9e63e
+        image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/datadog-news-crawler:72f34c2
         ports:
         - containerPort: 8000
         env:
@@ -44,7 +44,7 @@ spec:
         - name: DD_ENV
           value: prod
         - name: DD_VERSION
-          value: 9a9e63e
+          value: 72f34c2
         - name: DD_PROFILING_ENABLED
           value: "true"
         - name: DD_DATA_STREAMS_ENABLED
