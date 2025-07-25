@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: consumer                 
-          image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/news-consumer:00704e3
+          image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/news-consumer:67e1cdb
           env:
             - name: OPENAI_API_KEY
               valueFrom:
@@ -35,7 +35,7 @@ spec:
             - name: DD_ENV
               value: prod
             - name: DD_VERSION
-              value: "00704e3"
+              value: "67e1cdb"
             - name: DD_DATA_STREAMS_ENABLED
               value: "true"
             - name: DD_PROFILING_ENABLED
@@ -51,7 +51,7 @@ spec:
             - name: DD_GIT_REPOSITORY_URL
               value: "github.com/jungyoungseok/bitsfeed"
             - name: DD_GIT_COMMIT_SHA
-              value: "688ca53a0bd6d38d30f24d1ed7661105ad137bd2"
+              value: "67e1cdb613ea08d6170de106d86f3e798ba9c703"
               
 
 
