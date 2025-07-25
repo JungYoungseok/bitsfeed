@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: consumer                 
-          image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/news-consumer:00704e3
+          image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/news-consumer:9322719
           env:
             - name: OPENAI_API_KEY
               valueFrom:
@@ -35,7 +35,7 @@ spec:
             - name: DD_ENV
               value: prod
             - name: DD_VERSION
-              value: "00704e3"
+              value: "9322719"
             - name: DD_DATA_STREAMS_ENABLED
               value: "true"
             - name: DD_PROFILING_ENABLED
