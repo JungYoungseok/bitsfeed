@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datadog-analytics
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datadog-analytics
+  template:
+    metadata:
+      annotations:
+        admission.datadoghq.com/enabled: "true"
+      labels:
+        app: datadog-analytics
+    spec:
+      containers:
+      - name: datadog-analytics
+        image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/datadog-analytics:cdb7039
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8001
+        env:
+        - name: DD_SERVICE
+          value: datadog-analytics
+        - name: DD_ENV
+          value: prod
+        - name: DD_VERSION
+          value: latest
+        - name: DD_PROFILING_ENABLED
+          value: "true"
+        - name: DD_LOGS_INJECTION
+          value: "true"
+        - name: DD_GIT_REPOSITORY_URL
+          value: "github.com/jungyoungseok/bitsfeed"
+        - name: DD_GIT_COMMIT_SHA
+          value: "cdb7039"
+        - name: DD_APPSEC_ENABLED
+          value: "true"
+        - name: DD_IAST_ENABLED
+          value: "true"
+        - name: DD_APPSEC_SCA_ENABLED
+          value: "true"
+        - name: MONGO_URI
+          value: "mongodb://mongo:27017"
+        - name: PORT
+          value: "8001"
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "2Gi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 10
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: datadog-analytics
+  namespace: default
+spec:
+  selector:
+    app: datadog-analytics
+  ports:
+  - port: 8001
+    targetPort: 8001
+    protocol: TCP
+    name: http
+  type: ClusterIP 

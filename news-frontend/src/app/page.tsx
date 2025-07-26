@@ -57,14 +57,14 @@ export default function HomePage() {
         {/* 키워드 분석 대시보드 링크 */}
         <div className="flex gap-2">
           <Link
-            href="/api/proxy?type=viz&path=dashboard"
+            href="/api/analytics/viz/dashboard"
             target="_blank"
             className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm flex items-center gap-2"
           >
             🔍 키워드 분석
           </Link>
           <Link
-            href="/api/proxy?type=viz&path=simple"
+            href="/api/analytics/viz/simple"
             target="_blank"
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm flex items-center gap-2"
           >
