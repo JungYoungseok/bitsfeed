@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: consumer                 
-          image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/news-consumer:0f78efd
+          image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/news-consumer:962bd76
           imagePullPolicy: Always
           env:
             - name: OPENAI_API_KEY
@@ -36,7 +36,7 @@ spec:
             - name: DD_ENV
               value: prod
             - name: DD_VERSION
-              value: "0f78efd"
+              value: "962bd76"
             - name: DD_DATA_STREAMS_ENABLED
               value: "true"
             - name: DD_PROFILING_ENABLED
@@ -52,7 +52,7 @@ spec:
             - name: DD_GIT_REPOSITORY_URL
               value: "github.com/jungyoungseok/bitsfeed"
             - name: DD_GIT_COMMIT_SHA
-              value: "2b843d913a6a41b2b3e04e9de8b35cace46bb825"
+              value: "962bd762a3d17a17c58282c8f42fa0c4ae71d4df"
               
           resources:
             requests:
