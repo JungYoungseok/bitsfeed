@@ -68,5 +68,7 @@ jobs:
         else
           git add ./eks_resources/k8s/consumer-summary.yaml
           git commit -m "📊 Update consumer image tag to $IMAGE_TAG"
+          # Pull latest changes before pushing to avoid conflicts
+          git pull origin main --no-edit
           git push
         fi 
