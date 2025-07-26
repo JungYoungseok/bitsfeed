@@ -41,7 +41,7 @@ async def startup_event():
 
 @app.get("/hello")
 def hello():
-    return {"message": "👋 Hello from Datadog News Crawler!!!!!!!"}
+    return {"message": "👋 Hello from Datadog News Crawler! (Service-specific CI/CD)"}
 
 @app.get("/news")
 def list_news():
