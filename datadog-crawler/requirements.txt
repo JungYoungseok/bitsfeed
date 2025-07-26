@@ -1,3 +1,4 @@
+# Core API framework
 requests
 beautifulsoup4
 feedparser
@@ -8,17 +9,12 @@ pymongo
 apscheduler
 python-dotenv
 python-dateutil
+
+# Message broker
 confluent_kafka
+
+# External APIs
 openai
+
+# Datadog tracing
 ddtrace
-# 키워드 분석 및 시각화용 라이브러리
-konlpy
-scikit-learn
-wordcloud
-plotly
-networkx
-matplotlib
-seaborn
-pandas
-numpy
-collections-extended

@@ -1,0 +1,23 @@
+# Core API framework
+fastapi
+uvicorn
+python-dotenv
+
+# Database
+pymongo
+
+# Analytics and ML libraries
+konlpy
+scikit-learn
+wordcloud
+plotly
+networkx
+matplotlib
+seaborn
+pandas
+numpy
+collections-extended
+
+# Basic utilities
+requests
+python-dateutil 

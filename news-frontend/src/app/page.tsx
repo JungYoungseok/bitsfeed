@@ -45,13 +45,13 @@ export default function HomePage() {
     <main className="max-w-3xl mx-auto p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Image
-            src="/datadog-bits.png"
-            alt="Datadog Bits"
-            width={40}
-            height={40}
-          />
-          <h1 className="text-3xl font-bold text-purple-700">Datadog 뉴스 피드</h1>
+        <Image
+          src="/datadog-bits.png"
+          alt="Datadog Bits"
+          width={40}
+          height={40}
+        />
+        <h1 className="text-3xl font-bold text-purple-700">Datadog 뉴스 피드</h1>
         </div>
         
         {/* 키워드 분석 대시보드 링크 */}

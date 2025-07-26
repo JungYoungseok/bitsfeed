@@ -5,13 +5,15 @@ from db.mongodb import insert_news, get_all_news
 from fastapi.middleware.cors import CORSMiddleware
 from crawler.scheduler import start_scheduler, crawl_all_news
 from api.test_consume import router as test_consume_router
-from api.analytics import router as analytics_router
-from api.visualization import router as visualization_router
 from crawler.rss import fetch_datadog_rss
 
 try:
     from fastapi import FastAPI
-    app = FastAPI()
+    app = FastAPI(
+        title="Datadog News Crawler",
+        description="뉴스 크롤링 및 수집 전용 서비스",
+        version="1.0.0"
+    )
 except Exception as e:
     print("❌ FastAPI 로딩 실패:", e)
     raise e
@@ -19,7 +21,7 @@ except Exception as e:
 # 글로벌 스케줄러 변수
 scheduler = None
 
-#app = FastAPI()
+# CORS 설정
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # or ["http://localhost:3000"]
@@ -27,9 +29,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 크롤링 관련 라우터만 등록
 app.include_router(test_consume_router)
-app.include_router(analytics_router, prefix="/analytics")
-app.include_router(visualization_router, prefix="/viz")
 
 # 앱 시작 시 스케줄러 자동 실행
 @app.on_event("startup")
@@ -39,9 +41,24 @@ async def startup_event():
     print("[STARTUP] Starting news crawler scheduler...")
     scheduler = start_scheduler()
 
+@app.get("/")
+def root():
+    return {
+        "service": "Datadog News Crawler",
+        "version": "1.0.0", 
+        "description": "뉴스 크롤링 및 수집 전용 마이크로서비스",
+        "endpoints": {
+            "crawl": "/crawl",
+            "news": "/news",
+            "scheduler": "/scheduler/*",
+            "hello": "/hello"
+        },
+        "analytics_service": "http://datadog-analytics:8001"
+    }
+
 @app.get("/hello")
 def hello():
-    return {"message": "👋 Hello from Datadog News Crawler! (Service-specific CI/CD)"}
+    return {"message": "👋 Hello from Datadog News Crawler! (Lightweight & Fast)"}
 
 @app.get("/news")
 def list_news():
@@ -94,9 +111,3 @@ def get_scheduler_status():
         }
     else:
         return {"status": "stopped", "message": "Scheduler is not running"}
-
-# 매일 오전 9시에 실행
-# schedule.every().day.at("09:00").do(fetch_google_news)
-# while True:
-#     schedule.run_pending()
-#     time.sleep(60)

@@ -1,0 +1,133 @@
+name: Deploy Analytics (datadog-analytics)
+
+on:
+  push:
+    paths:
+      - datadog-analytics/**
+    branches: [main]
+  workflow_dispatch: # 수동 실행 지원
+
+env:
+  ECR_REGISTRY: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com
+  IMAGE_NAME_ANALYTICS: datadog-analytics
+
+jobs:
+  build-analytics:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      id-token: write
+      contents: write
+    
+    outputs:
+      image-tag: ${{ steps.meta.outputs.image-tag }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::269622523990:role/GitHubActionsECRDeployRole
+        aws-region: ap-northeast-2
+
+    - name: Set IMAGE_TAG and metadata
+      id: meta
+      run: |
+        IMAGE_TAG=${GITHUB_SHA::7}
+        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+        echo "image-tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    - name: Login to Amazon ECR
+      run: |
+        aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+    - name: Build and push analytics image
+      run: |
+        docker buildx create --use || true
+        docker buildx build \
+          --platform linux/arm64 \
+          -t $ECR_REGISTRY/$IMAGE_NAME_ANALYTICS:$IMAGE_TAG \
+          --load ./datadog-analytics
+        docker push $ECR_REGISTRY/$IMAGE_NAME_ANALYTICS:$IMAGE_TAG
+        echo "✅ Analytics image pushed: $ECR_REGISTRY/$IMAGE_NAME_ANALYTICS:$IMAGE_TAG"
+
+    - name: Create analytics deployment manifest
+      run: |
+        cat > ./eks_resources/k8s/analytics-deployment.yaml << EOF
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: datadog-analytics
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: datadog-analytics
+          template:
+            metadata:
+              annotations:
+                admission.datadoghq.com/enabled: "true"
+              labels:
+                app: datadog-analytics
+            spec:
+              containers:
+              - name: datadog-analytics
+                image: $ECR_REGISTRY/$IMAGE_NAME_ANALYTICS:$IMAGE_TAG
+                imagePullPolicy: Always
+                ports:
+                - containerPort: 8001
+                env:
+                - name: DD_SERVICE
+                  value: datadog-analytics
+                - name: DD_ENV
+                  value: prod
+                - name: DD_VERSION
+                  value: $IMAGE_TAG
+                - name: DD_PROFILING_ENABLED
+                  value: "true"
+                - name: DD_LOGS_INJECTION
+                  value: "true"
+                - name: DD_GIT_REPOSITORY_URL
+                  value: "github.com/jungyoungseok/bitsfeed"
+                - name: DD_GIT_COMMIT_SHA
+                  value: "$GITHUB_SHA"
+                - name: DD_APPSEC_ENABLED
+                  value: "true"
+                - name: DD_IAST_ENABLED
+                  value: "true"
+                - name: DD_APPSEC_SCA_ENABLED
+                  value: "true"
+                resources:
+                  requests:
+                    cpu: "200m"
+                    memory: "512Mi"
+                  limits:
+                    cpu: "1000m"
+                    memory: "2Gi"
+        ---
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: datadog-analytics
+        spec:
+          selector:
+            app: datadog-analytics
+          ports:
+          - port: 8001
+            targetPort: 8001
+          type: ClusterIP
+        EOF
+
+    - name: Commit and push updated manifest
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        if git diff --quiet ./eks_resources/k8s/analytics-deployment.yaml; then
+          echo "No changes to commit"
+        else
+          git add ./eks_resources/k8s/analytics-deployment.yaml
+          git commit -m "📊 Update analytics image tag to $IMAGE_TAG"
+          git push
+        fi 
