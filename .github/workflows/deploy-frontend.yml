@@ -63,12 +63,14 @@ jobs:
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
+        # Configure git pull strategy to avoid divergent branches error
+        git config pull.rebase false
         if git diff --quiet ./eks_resources/k8s/news-frontend.yaml; then
           echo "No changes to commit"
         else
           git add ./eks_resources/k8s/news-frontend.yaml
           git commit -m "🌐 Update frontend image tag to $IMAGE_TAG"
-          # Pull latest changes before pushing to avoid conflicts
-          git pull origin main --no-edit
+          # Pull latest changes with merge strategy before pushing
+          git pull origin main --no-edit || echo "Pull failed, continuing with push"
           git push
         fi 
