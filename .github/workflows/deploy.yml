@@ -39,50 +39,37 @@ jobs:
       run: |
         aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_REGISTRY
 
-    # Docker Buildx 설정 및 캐시 활용
+    # Docker Buildx 설정
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
-      with:
-        driver-opts: |
-          image=moby/buildkit:latest
 
-    # 🚀 병렬 빌드 및 푸시 (모든 이미지 동시 빌드)
-    - name: Build and push all images in parallel
+    # 🚀 안정적인 순차 빌드로 변경 (에러 디버깅 용이)
+    - name: Build and push backend image (datadog-news-crawler)
       run: |
-        # Backend 빌드 (백그라운드)
         docker buildx build \
-          --platform linux/arm64 \
+          --platform linux/amd64,linux/arm64 \
           --cache-from type=gha,scope=backend \
           --cache-to type=gha,mode=max,scope=backend \
           -t $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG \
-          --push ./datadog-crawler &
-        BACKEND_PID=$!
+          --push ./datadog-crawler
 
-        # Consumer 빌드 (백그라운드)
+    - name: Build and push consumer image (news-consumer)
+      run: |
         docker buildx build \
-          --platform linux/arm64 \
+          --platform linux/amd64,linux/arm64 \
           --cache-from type=gha,scope=consumer \
           --cache-to type=gha,mode=max,scope=consumer \
           -t $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG \
-          --push ./news-consumer &
-        CONSUMER_PID=$!
+          --push ./news-consumer
 
-        # Frontend 빌드 (백그라운드)
+    - name: Build and push frontend image (news-frontend)
+      run: |
         docker buildx build \
-          --platform linux/arm64 \
+          --platform linux/amd64,linux/arm64 \
           --cache-from type=gha,scope=frontend \
           --cache-to type=gha,mode=max,scope=frontend \
           -t $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:$IMAGE_TAG \
-          --push ./news-frontend &
-        FRONTEND_PID=$!
-
-        # 모든 빌드 완료 대기
-        echo "⏳ Waiting for all builds to complete..."
-        wait $BACKEND_PID && echo "✅ Backend build completed"
-        wait $CONSUMER_PID && echo "✅ Consumer build completed" 
-        wait $FRONTEND_PID && echo "✅ Frontend build completed"
-        
-        echo "🎉 All images built and pushed successfully!"
+          --push ./news-frontend
 
     - name: Update consumer-summary.yaml with new image tag
       run: |

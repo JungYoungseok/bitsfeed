@@ -16,6 +16,7 @@ spec:
       containers:
         - name: consumer                 
           image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/news-consumer:0f78efd
+          imagePullPolicy: Always
           env:
             - name: OPENAI_API_KEY
               valueFrom:
@@ -51,10 +52,8 @@ spec:
             - name: DD_GIT_REPOSITORY_URL
               value: "github.com/jungyoungseok/bitsfeed"
             - name: DD_GIT_COMMIT_SHA
-              value: "0f78efd13d32cbd176bf8e72c92ac245860bcbb9"
+              value: "2b843d913a6a41b2b3e04e9de8b35cace46bb825"
               
-
-
           resources:
             requests:
               cpu: 100m
