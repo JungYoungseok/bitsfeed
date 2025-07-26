@@ -1,6 +1,7 @@
 # 📰 Datadog News Crawler
 
 <!-- 🧪 Deploy.yml 테스트: 2024-01-20 -->
+<!-- 🚀 Multi-platform build test: 2024-01-20 -->
 
 Google News에서 Datadog 관련 뉴스를 수집하고, FastAPI로 조회하는 서비스입니다.  
 MongoDB Atlas를 사용해 데이터를 저장하며, AWS EKS에 배포할 수 있습니다.
