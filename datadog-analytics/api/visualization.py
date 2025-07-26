@@ -238,7 +238,7 @@ def keyword_dashboard():
             
             async function checkStatus() {
                 try {
-                    const status = await fetchData('/analytics/keywords/status');
+                    const status = await fetchData('/api/analytics/keywords/status');
                     
                     let statusMessage = `
                         <strong>📊 키워드 시스템 상태:</strong><br>
@@ -273,7 +273,7 @@ def keyword_dashboard():
                 }
                 
                 try {
-                    const response = await fetch('/analytics/keywords/initialize', {method: 'POST'});
+                    const response = await fetch('/api/analytics/keywords/initialize', {method: 'POST'});
                     const result = await response.json();
                     
                     showInfo(result.message);
@@ -290,7 +290,7 @@ def keyword_dashboard():
             
             async function updateKeywords() {
                 try {
-                    const response = await fetch('/analytics/keywords/update', {method: 'POST'});
+                    const response = await fetch('/api/analytics/keywords/update', {method: 'POST'});
                     const result = await response.json();
                     
                     showInfo(result.message);
@@ -314,7 +314,7 @@ def keyword_dashboard():
                 document.getElementById('treemap').innerHTML = '';
                 
                 try {
-                    const data = await fetchData('/analytics/keywords/treemap', { 
+                    const data = await fetchData('/api/analytics/keywords/treemap', { 
                         days, 
                         limit, 
                         use_mongodb: useMongodb 
@@ -346,7 +346,7 @@ def keyword_dashboard():
                 document.getElementById('network').innerHTML = '';
                 
                 try {
-                    const data = await fetchData('/analytics/keywords/network', { 
+                    const data = await fetchData('/api/analytics/keywords/network', { 
                         days, 
                         min_cooccurrence: minCooccurrence,
                         use_mongodb: useMongodb
@@ -378,7 +378,7 @@ def keyword_dashboard():
                 document.getElementById('trends').innerHTML = '';
                 
                 try {
-                    const data = await fetchData('/analytics/keywords/trends', { 
+                    const data = await fetchData('/api/analytics/keywords/trends', { 
                         days: trendDays, 
                         top_n: topN,
                         use_mongodb: useMongodb
@@ -476,7 +476,7 @@ def simple_visualization():
             
             async function checkStatus() {
                 try {
-                    const response = await fetch('/analytics/keywords/status');
+                    const response = await fetch('/api/analytics/keywords/status');
                     const status = await response.json();
                     
                     document.getElementById('status').innerHTML = `
@@ -496,7 +496,7 @@ def simple_visualization():
                 if (!confirm('시스템을 초기화하시겠습니까?')) return;
                 
                 try {
-                    const response = await fetch('/analytics/keywords/initialize', {method: 'POST'});
+                    const response = await fetch('/api/analytics/keywords/initialize', {method: 'POST'});
                     const result = await response.json();
                     
                     alert(result.message);
@@ -508,7 +508,7 @@ def simple_visualization():
             
             async function loadTreemap() {
                 try {
-                    const response = await fetch('/analytics/keywords/treemap?days=7&limit=20&use_mongodb=true');
+                    const response = await fetch('/api/analytics/keywords/treemap?days=7&limit=20&use_mongodb=true');
                     const data = await response.json();
                     
                     if (data.error) {
@@ -524,7 +524,7 @@ def simple_visualization():
             
             async function loadNetwork() {
                 try {
-                    const response = await fetch('/analytics/keywords/network?days=7&min_cooccurrence=2&use_mongodb=true');
+                    const response = await fetch('/api/analytics/keywords/network?days=7&min_cooccurrence=2&use_mongodb=true');
                     const data = await response.json();
                     
                     if (data.error) {
