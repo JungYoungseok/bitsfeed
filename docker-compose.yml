@@ -1,9 +1,9 @@
-version: "3.9"
-
 services:
   backend:
     build:
       context: ./datadog-crawler
+      cache_from:
+        - bitsfeed-backend:latest
     container_name: datadog-crawler
     ports:
       - "8000:8000"
@@ -31,6 +31,8 @@ services:
   news-consumer:
     build:
       context: ./news-consumer
+      cache_from:
+        - bitsfeed-news-consumer:latest
     container_name: news-consumer
     depends_on:
       - kafka
@@ -47,6 +49,8 @@ services:
   frontend:
     build:
       context: ./news-frontend
+      cache_from:
+        - bitsfeed-frontend:latest
     container_name: datadog-ui
     ports:
       - "3000:3000"
