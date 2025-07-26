@@ -39,37 +39,30 @@ jobs:
       run: |
         aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_REGISTRY
 
-    # Docker Buildx 설정
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-
-    # 🚀 안정적인 순차 빌드로 변경 (에러 디버깅 용이)
     - name: Build and push backend image (datadog-news-crawler)
       run: |
+        docker buildx create --use || true
         docker buildx build \
-          --platform linux/amd64,linux/arm64 \
-          --cache-from type=gha,scope=backend \
-          --cache-to type=gha,mode=max,scope=backend \
+          --platform linux/arm64 \
           -t $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG \
-          --push ./datadog-crawler
+          --load ./datadog-crawler
+        docker push $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
 
     - name: Build and push consumer image (news-consumer)
       run: |
         docker buildx build \
-          --platform linux/amd64,linux/arm64 \
-          --cache-from type=gha,scope=consumer \
-          --cache-to type=gha,mode=max,scope=consumer \
+          --platform linux/arm64 \
           -t $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG \
-          --push ./news-consumer
+          --load ./news-consumer
+        docker push $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG
 
     - name: Build and push frontend image (news-frontend)
       run: |
         docker buildx build \
-          --platform linux/amd64,linux/arm64 \
-          --cache-from type=gha,scope=frontend \
-          --cache-to type=gha,mode=max,scope=frontend \
+          --platform linux/arm64 \
           -t $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:$IMAGE_TAG \
-          --push ./news-frontend
+          --load ./news-frontend
+        docker push $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:$IMAGE_TAG
 
     - name: Update consumer-summary.yaml with new image tag
       run: |
