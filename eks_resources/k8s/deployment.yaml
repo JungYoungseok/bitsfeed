@@ -25,7 +25,7 @@ spec:
               app: datadog-news-crawler
       containers:
       - name: datadog-news-crawler
-        image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/datadog-news-crawler:dfba3f9
+        image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/datadog-news-crawler:cdb7039
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
@@ -45,7 +45,7 @@ spec:
         - name: DD_ENV
           value: prod
         - name: DD_VERSION
-          value: dfba3f9
+          value: cdb7039
         - name: DD_PROFILING_ENABLED
           value: "true"
         - name: DD_DATA_STREAMS_ENABLED
@@ -55,7 +55,7 @@ spec:
         - name: DD_GIT_REPOSITORY_URL
           value: "github.com/jungyoungseok/bitsfeed"
         - name: DD_GIT_COMMIT_SHA
-          value: "dfba3f9dfe08c0e1a77287d3fe40d1d4b010993d"
+          value: "cdb70399cec4f5716b59724fd5d920e839279927"
         - name: DD_APPSEC_ENABLED
           value: "true"
         - name: DD_IAST_ENABLED
