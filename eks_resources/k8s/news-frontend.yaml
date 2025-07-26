@@ -31,6 +31,8 @@ spec:
               value: "true"
             - name: NEWS_API_URL
               value: "http://datadog-news-crawler:8000"
+            - name: ANALYTICS_API_URL
+              value: "http://datadog-analytics:8001"
             - name: DD_LOGS_INJECTION
               value: "true"
             - name: DD_GIT_REPOSITORY_URL
