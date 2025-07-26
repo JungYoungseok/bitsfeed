@@ -1,6 +1,4 @@
 import feedparser
-import schedule
-import time
 from bs4 import BeautifulSoup
 from datetime import datetime
 import urllib.parse
@@ -43,5 +41,3 @@ def fetch_google_news():
 
     print(results)
     return results
-
-fetch_google_news()

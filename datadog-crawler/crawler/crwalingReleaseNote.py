@@ -1,6 +1,4 @@
 import requests
-import schedule
-import time
 import os
 import re
 from bs4 import BeautifulSoup
@@ -56,14 +54,14 @@ def fetch_latest_release():
     else:
         print(f"[변경 없음] 최신 릴리스: {latest_tag}")
 
+# 이 스크립트는 현재 사용하지 않습니다 (APScheduler 사용)
 # 매일 오전 9시 실행
-schedule.every().day.at("09:00").do(fetch_latest_release)
-schedule.every().day.at("15:00").do(fetch_latest_release)
-
+# schedule.every().day.at("09:00").do(fetch_latest_release)
+# schedule.every().day.at("15:00").do(fetch_latest_release)
 
 # 테스트용 수동 실행
-#fetch_latest_release()
+# fetch_latest_release()
 
-while True:
-    schedule.run_pending()
-    time.sleep(60)
+# while True:
+#     schedule.run_pending()
+#     time.sleep(60)

@@ -1,6 +1,4 @@
 import requests
-import schedule
-import time
 import os
 import re
 from bs4 import BeautifulSoup
@@ -56,12 +54,5 @@ def fetch_latest_release():
     else:
         print(f"[변경 없음] 최신 릴리스: {latest_tag}")
 
-# 매일 오전 9시 실행
-#schedule.every().day.at("09:00").do(fetch_latest_release)
-
-# 테스트용 수동 실행
-fetch_latest_release()
-
-# while True:
-#     schedule.run_pending()
-#     time.sleep(60)
+# 이 함수는 외부에서 호출하여 사용합니다
+# fetch_latest_release()
