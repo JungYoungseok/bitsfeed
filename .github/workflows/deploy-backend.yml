@@ -1,0 +1,72 @@
+name: Deploy Backend (datadog-crawler)
+
+on:
+  push:
+    paths:
+      - datadog-crawler/**
+    branches: [main]
+  workflow_dispatch: # 수동 실행 지원
+
+env:
+  ECR_REGISTRY: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com
+  IMAGE_NAME: datadog-news-crawler
+
+jobs:
+  build-backend:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      id-token: write
+      contents: write
+    
+    outputs:
+      image-tag: ${{ steps.meta.outputs.image-tag }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::269622523990:role/GitHubActionsECRDeployRole
+        aws-region: ap-northeast-2
+
+    - name: Set IMAGE_TAG and metadata
+      id: meta
+      run: |
+        IMAGE_TAG=${GITHUB_SHA::7}
+        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+        echo "image-tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    - name: Login to Amazon ECR
+      run: |
+        aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+    - name: Build and push backend image
+      run: |
+        docker buildx create --use || true
+        docker buildx build \
+          --platform linux/arm64 \
+          -t $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG \
+          --load ./datadog-crawler
+        docker push $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+        echo "✅ Backend image pushed: $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG"
+
+    - name: Update deployment.yaml
+      run: |
+        sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME:\).*|image: $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG|" ./eks_resources/k8s/deployment.yaml
+        sed -i "/name: DD_VERSION/{n;s/value: .*/value: $IMAGE_TAG/}" ./eks_resources/k8s/deployment.yaml
+        sed -i "/name: DD_GIT_COMMIT_SHA/{n;s/value: \".*\"/value: \"$GITHUB_SHA\"/}" ./eks_resources/k8s/deployment.yaml
+
+    - name: Commit and push updated manifest
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        if git diff --quiet ./eks_resources/k8s/deployment.yaml; then
+          echo "No changes to commit"
+        else
+          git add ./eks_resources/k8s/deployment.yaml
+          git commit -m "🚀 Update backend image tag to $IMAGE_TAG"
+          git push
+        fi 

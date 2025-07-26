@@ -1,12 +1,27 @@
-name: CI/CD to EKS via Argo CD
+# ⚠️ DEPRECATED: This workflow is replaced by service-specific workflows
+# Use these instead:
+# - .github/workflows/deploy-backend.yml (datadog-crawler)
+# - .github/workflows/deploy-consumer.yml (news-consumer)  
+# - .github/workflows/deploy-frontend.yml (news-frontend)
+
+name: CI/CD to EKS via Argo CD (DEPRECATED)
 
 on:
-  push:
-    paths:
-      - datadog-crawler/**
-      - news-frontend/**
-      - news-consumer/**
-    branches: [main]
+  # Disabled: Service-specific workflows are now used
+  # push:
+  #   paths:
+  #     - datadog-crawler/**
+  #     - news-frontend/**
+  #     - news-consumer/**
+  #   branches: [main]
+  
+  # Manual trigger only for emergency use
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Service to deploy (all, backend, consumer, frontend)'
+        required: true
+        default: 'all'
 
 env:
   ECR_REGISTRY: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com
@@ -23,23 +38,37 @@ jobs:
       id-token: write
       contents: write
     steps:
+    - name: ⚠️ Workflow Deprecated Notice
+      run: |
+        echo "::warning::This integrated workflow is deprecated."
+        echo "::warning::Please use service-specific workflows for better performance:"
+        echo "::warning::- Backend: deploy-backend.yml"
+        echo "::warning::- Consumer: deploy-consumer.yml" 
+        echo "::warning::- Frontend: deploy-frontend.yml"
+        echo "Service selected: ${{ github.event.inputs.service || 'auto-trigger (disabled)' }}"
+
     - name: Checkout code
       uses: actions/checkout@v3
+      if: github.event.inputs.service == 'all'
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v2
+      if: github.event.inputs.service == 'all'
       with:
         role-to-assume: arn:aws:iam::269622523990:role/GitHubActionsECRDeployRole
         aws-region: ap-northeast-2
 
     - name: Set IMAGE_TAG as short SHA
+      if: github.event.inputs.service == 'all'
       run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
     - name: Login to Amazon ECR
+      if: github.event.inputs.service == 'all'
       run: |
         aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_REGISTRY
 
     - name: Build and push backend image (datadog-news-crawler)
+      if: github.event.inputs.service == 'all'
       run: |
         docker buildx create --use || true
         docker buildx build \
@@ -49,6 +78,7 @@ jobs:
         docker push $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
 
     - name: Build and push consumer image (news-consumer)
+      if: github.event.inputs.service == 'all'
       run: |
         docker buildx build \
           --platform linux/arm64 \
@@ -57,6 +87,7 @@ jobs:
         docker push $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG
 
     - name: Build and push frontend image (news-frontend)
+      if: github.event.inputs.service == 'all'
       run: |
         docker buildx build \
           --platform linux/arm64 \
@@ -65,24 +96,28 @@ jobs:
         docker push $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:$IMAGE_TAG
 
     - name: Update consumer-summary.yaml with new image tag
+      if: github.event.inputs.service == 'all'
       run: |
         sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_CONSUMER:$IMAGE_TAG|" ./eks_resources/k8s/consumer-summary.yaml
         sed -i "/name: DD_VERSION/{n;s/value: \".*\"/value: \"$IMAGE_TAG\"/}" ./eks_resources/k8s/consumer-summary.yaml
         sed -i "/name: DD_GIT_COMMIT_SHA/{n;s/value: \".*\"/value: \"$GITHUB_SHA\"/}" ./eks_resources/k8s/consumer-summary.yaml
 
     - name: Update news-frontend.yaml with new image tag
+      if: github.event.inputs.service == 'all'
       run: |
         sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:\).*|image: $ECR_REGISTRY/$IMAGE_NAME_FRONTEND:$IMAGE_TAG|" ./eks_resources/k8s/news-frontend.yaml
         sed -i "/name: DD_VERSION/{n;s/value: .*/value: $IMAGE_TAG/}" ./eks_resources/k8s/news-frontend.yaml
         sed -i "/name: DD_GIT_COMMIT_SHA/{n;s/value: \".*\"/value: \"$GITHUB_SHA\"/}" ./eks_resources/k8s/news-frontend.yaml
   
     - name: Update deployment.yaml with new image tags
+      if: github.event.inputs.service == 'all'
       run: |
         sed -i "s|\(image: $ECR_REGISTRY/$IMAGE_NAME:\).*|image: $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG|" ./eks_resources/k8s/deployment.yaml
         sed -i "/name: DD_VERSION/{n;s/value: .*/value: $IMAGE_TAG/}" ./eks_resources/k8s/deployment.yaml
         sed -i "/name: DD_GIT_COMMIT_SHA/{n;s/value: \".*\"/value: \"$GITHUB_SHA\"/}" ./eks_resources/k8s/deployment.yaml
 
     - name: Commit and push updated Kubernetes manifests
+      if: github.event.inputs.service == 'all'
       run: |
         git config user.name "github-actions"
         git config user.email "ci@github.com"
