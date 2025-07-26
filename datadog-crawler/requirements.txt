@@ -1,20 +1,22 @@
 # Core API framework
+fastapi
+uvicorn
+python-dotenv
+
+# Web scraping and parsing  
 requests
 beautifulsoup4
 feedparser
-schedule
-fastapi
-uvicorn
+
+# Database
 pymongo
-apscheduler
-python-dotenv
 python-dateutil
+
+# Scheduling
+apscheduler
 
 # Message broker
 confluent_kafka
-
-# External APIs
-openai
 
 # Datadog tracing
 ddtrace

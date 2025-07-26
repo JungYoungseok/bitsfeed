@@ -62,4 +62,13 @@ datasets/
 # Documentation
 README.md
 docs/
-*.md 
+*.md
+
+# Development tools
+benchmark_build.sh
+*.sh
+
+# Build artifacts
+dist/
+build/
+*.egg-info/ 

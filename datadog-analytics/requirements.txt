@@ -5,19 +5,14 @@ python-dotenv
 
 # Database
 pymongo
+python-dateutil
 
 # Analytics and ML libraries
 konlpy
-scikit-learn
-wordcloud
 plotly
 networkx
-matplotlib
-seaborn
 pandas
 numpy
-collections-extended
 
 # Basic utilities
-requests
-python-dateutil 
+collections-extended 

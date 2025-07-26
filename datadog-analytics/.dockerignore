@@ -50,7 +50,19 @@ README.md
 docs/
 *.md
 
+# Development tools
+*.sh
+debug_*
+test_*
+
 # Build artifacts
 dist/
 build/
-*.egg-info/ 
+*.egg-info/
+
+# Data files
+*.csv
+*.json
+*.xml
+data/
+datasets/ 

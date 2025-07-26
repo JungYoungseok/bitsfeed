@@ -144,6 +144,16 @@ export default function HomePage() {
           다음 ▶
         </button>
       </div>
+      
+      {/* Version info for workflow testing */}
+      <div className="mt-8 pt-4 border-t border-gray-200 text-center">
+        <p className="text-xs text-gray-500">
+          🚀 Datadog News Feed v2024.1.20 | Frontend Service | 
+          <span className="ml-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+            ✅ Active
+          </span>
+        </p>
+      </div>
     </main>
   );
 }
