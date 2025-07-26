@@ -12,6 +12,7 @@ import asyncio
 from utils import build_prompt, call_openai, save_summary_to_mongo
 
 def run_summary_consumer():
+    print("🚀 News Consumer Summary Service Starting... (GitHub Actions Test - v2024.1.20)")
     openai.api_key = os.getenv("OPENAI_API_KEY")
     mongo = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017"))
     collection = mongo["bitsfeed"]["news"]
@@ -67,5 +68,6 @@ def run_summary_consumer():
     asyncio.run(poll_loop())
 
 if __name__ == "__main__":
-    print("run_summary_consumer() executed")
+    print("📊 Initializing News Consumer Summary Service...")
+    print("🔧 Starting run_summary_consumer() execution")
     run_summary_consumer()
