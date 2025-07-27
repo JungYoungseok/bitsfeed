@@ -18,5 +18,4 @@ apscheduler
 # Message broker
 confluent_kafka
 
-# Datadog tracing
-ddtrace
+# Note: ddtrace는 Single Step Instrumentation으로 자동 설치됨
