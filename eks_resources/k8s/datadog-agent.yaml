@@ -53,3 +53,12 @@ spec:
       enabled: true
     remoteConfiguration:
       enabled: true
+    # Live Process Monitoring 활성화
+    liveProcessCollection:
+      enabled: true
+    # Process Collection 활성화 (Live Process의 기본 요구사항)
+    processCollection:
+      enabled: true
+    # Orchestrator Explorer 활성화 (Kubernetes 리소스 모니터링)
+    orchestratorExplorer:
+      enabled: true
