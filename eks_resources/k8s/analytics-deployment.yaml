@@ -43,7 +43,10 @@ spec:
         - name: DD_APPSEC_SCA_ENABLED
           value: "true"
         - name: MONGO_URI
-          value: "mongodb://mongo:27017"
+          valueFrom:
+            secretKeyRef:
+              name: datadog-secrets
+              key: mongo-uri
         - name: PORT
           value: "8001"
         resources:
