@@ -62,6 +62,8 @@ services:
       cache_from:
         - bitsfeed-news-consumer:latest
     container_name: news-consumer
+    ports:
+      - "8002:8002"
     depends_on:
       - kafka
       - mongo
@@ -85,6 +87,7 @@ services:
     environment:
       - NEWS_API_URL=http://datadog-crawler:8000
       - ANALYTICS_API_URL=http://datadog-analytics:8001
+      - CONSUMER_API_URL=http://news-consumer:8002
       - MONGO_URI=mongodb://mongo:27017
     networks:
       - bitsfeed-net

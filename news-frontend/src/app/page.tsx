@@ -54,7 +54,7 @@ export default function HomePage() {
         <h1 className="text-3xl font-bold text-purple-700">Datadog 뉴스 피드</h1>
         </div>
         
-        {/* 키워드 분석 대시보드 링크 */}
+        {/* 분석 도구 및 서비스 모니터링 링크 */}
         <div className="flex gap-2">
           <Link
             href="/api/analytics/viz/dashboard"
@@ -69,6 +69,13 @@ export default function HomePage() {
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm flex items-center gap-2"
           >
             📊 간단 차트
+          </Link>
+          <Link
+            href="/api/consumer/status"
+            target="_blank"
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm flex items-center gap-2"
+          >
+            🔧 Consumer 상태
           </Link>
         </div>
       </div>

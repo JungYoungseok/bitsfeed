@@ -17,6 +17,8 @@ spec:
         - name: consumer                 
           image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/news-consumer:962bd76
           imagePullPolicy: Always
+          ports:
+          - containerPort: 8002
           env:
             - name: OPENAI_API_KEY
               valueFrom:
@@ -37,6 +39,8 @@ spec:
               value: prod
             - name: DD_VERSION
               value: "962bd76"
+            - name: PYTHONPATH
+              value: "/opt/datadog/apm/library/python/ddtrace_pkgs/site-packages-ddtrace-py3.10-manylinux2014"
             - name: DD_DATA_STREAMS_ENABLED
               value: "true"
             - name: DD_PROFILING_ENABLED
@@ -61,3 +65,18 @@ spec:
             limits:
               cpu: 200m
               memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: news-consumer-api
+  namespace: default
+spec:
+  selector:
+    app: news-consumer
+  ports:
+  - port: 8002
+    targetPort: 8002
+    protocol: TCP
+    name: api
+  type: ClusterIP
