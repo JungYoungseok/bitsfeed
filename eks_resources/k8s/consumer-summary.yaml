@@ -57,7 +57,10 @@ spec:
               value: "github.com/jungyoungseok/bitsfeed"
             - name: DD_GIT_COMMIT_SHA
               value: "8f580bc0f55f830d74eb5218a9c8e20230881065"
-              
+            - name: DD_DYNAMIC_INSTRUMENTATION_ENABLED
+              value: "true"
+            - name: DD_CODE_ORIGIN_FOR_SPANS_ENABLED
+              value: "true"
           resources:
             requests:
               cpu: 100m

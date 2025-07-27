@@ -63,4 +63,4 @@ spec:
       env:
         # Health check 엔드포인트 trace 필터링
         - name: DD_APM_IGNORE_RESOURCES
-          value: "GET /health,GET /ping,GET /status,GET /_health,GET /healthz,GET /readiness,GET /liveness"
+          value: "GET /health,GET /ping,GET /_health,GET /healthz,GET /readiness,GET /liveness"
