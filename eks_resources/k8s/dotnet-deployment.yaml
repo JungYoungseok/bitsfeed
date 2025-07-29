@@ -169,7 +169,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: dotnet-sample
+  name: dotnet-sample-external
   namespace: default
   labels:
     app: dotnet-sample
@@ -182,11 +182,11 @@ spec:
   selector:
     app: dotnet-sample
   ports:
-  - port: 5000
+  - port: 80
     targetPort: 5000
     protocol: TCP
     name: http
-  type: ClusterIP
+  type: LoadBalancer
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler

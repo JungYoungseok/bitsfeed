@@ -77,6 +77,20 @@ export default function HomePage() {
           >
             🔧 Consumer 상태
           </Link>
+          <Link
+            href="/api/dotnet/health"
+            target="_blank"
+            className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium text-sm flex items-center gap-2"
+          >
+            🚀 .NET Health
+          </Link>
+          <Link
+            href="/api/dotnet/users"
+            target="_blank"
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm flex items-center gap-2"
+          >
+            👥 .NET Users
+          </Link>
         </div>
       </div>
 
