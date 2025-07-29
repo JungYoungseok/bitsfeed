@@ -69,7 +69,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-Console.WriteLine("🚀 .NET Core 8 Sample API is starting...");
+Console.WriteLine("🚀 .NET Core 8 Sample API is starting in Production...");
 Console.WriteLine("📊 Datadog APM monitoring enabled");
 Console.WriteLine("🔗 Swagger UI: http://localhost:5000/swagger");
 
