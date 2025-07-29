@@ -1,0 +1,135 @@
+name: Deploy .NET Core Sample
+
+on:
+  push:
+    paths:
+      - dotnet-sample/**
+    branches: [main]
+  workflow_dispatch: # 수동 실행 지원
+
+env:
+  ECR_REGISTRY: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com
+  IMAGE_NAME: dotnet-sample
+
+jobs:
+  build-dotnet:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      id-token: write
+      contents: write
+    
+    outputs:
+      image-tag: ${{ steps.meta.outputs.image-tag }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::269622523990:role/GitHubActionsECRDeployRole
+        aws-region: ap-northeast-2
+
+    - name: Set IMAGE_TAG and metadata
+      id: meta
+      run: |
+        IMAGE_TAG=${GITHUB_SHA::7}
+        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+        echo "image-tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    - name: Login to Amazon ECR
+      run: |
+        aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+    - name: Build and push .NET Core image
+      run: |
+        docker buildx create --use || true
+        docker buildx build \
+          --platform linux/arm64 \
+          --build-arg BUILDKIT_INLINE_CACHE=1 \
+          --cache-from $ECR_REGISTRY/$IMAGE_NAME:latest \
+          --tag $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG \
+          --tag $ECR_REGISTRY/$IMAGE_NAME:latest \
+          --push \
+          ./dotnet-sample
+
+    - name: Update Kubernetes manifest
+      run: |
+        # Update deployment image tag
+        sed -i "s|image: $ECR_REGISTRY/$IMAGE_NAME:.*|image: $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG|g" ./eks_resources/k8s/dotnet-deployment.yaml
+        
+        echo "🚀 Updated dotnet-deployment.yaml with image tag: $IMAGE_TAG"
+        cat ./eks_resources/k8s/dotnet-deployment.yaml | grep "image:"
+
+    - name: Commit and push updated manifest
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        # Configure git pull strategy to avoid divergent branches error
+        git config pull.rebase false
+        if git diff --quiet ./eks_resources/k8s/dotnet-deployment.yaml; then
+          echo "No changes to commit"
+        else
+          git add ./eks_resources/k8s/dotnet-deployment.yaml
+          git commit -m "🚀 Update .NET Core image tag to $IMAGE_TAG"
+          # Pull latest changes with merge strategy before pushing
+          git pull origin main --no-edit || echo "Pull failed, continuing with push"
+          git push
+        fi
+
+  deploy-dotnet:
+    needs: build-dotnet
+    runs-on: ubuntu-latest
+    
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        ref: main
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::269622523990:role/GitHubActionsECRDeployRole
+        aws-region: ap-northeast-2
+
+    - name: Install kubectl
+      run: |
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
+
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig --region ap-northeast-2 --name bitsfeed-cluster
+
+    - name: Deploy to Kubernetes
+      run: |
+        echo "🚀 Deploying .NET Core Sample to Kubernetes..."
+        
+        # Deploy MySQL first
+        kubectl apply -f ./eks_resources/k8s/mysql-deployment.yaml
+        
+        # Wait for MySQL to be ready
+        echo "⏳ Waiting for MySQL to be ready..."
+        kubectl wait --for=condition=available --timeout=300s deployment/mysql-dotnet
+        
+        # Deploy .NET Core application
+        kubectl apply -f ./eks_resources/k8s/dotnet-deployment.yaml
+        
+        # Wait for deployment
+        echo "⏳ Waiting for .NET Core deployment to be ready..."
+        kubectl wait --for=condition=available --timeout=300s deployment/dotnet-sample
+        
+        # Check pod status
+        echo "📋 Pod Status:"
+        kubectl get pods -l app=dotnet-sample
+        
+        echo "✅ .NET Core Sample deployment completed!" 
