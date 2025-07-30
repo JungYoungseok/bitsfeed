@@ -49,11 +49,13 @@ jobs:
         docker buildx build \
           --platform linux/arm64 \
           --build-arg BUILDKIT_INLINE_CACHE=1 \
-          --cache-from $ECR_REGISTRY/$IMAGE_NAME:latest \
           --tag $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG \
           --tag $ECR_REGISTRY/$IMAGE_NAME:latest \
-          --push \
+          --load \
           ./dotnet-sample
+        docker push $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$IMAGE_NAME:latest
+        echo "✅ .NET Core image pushed: $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG"
 
     - name: Update Kubernetes manifest
       run: |
