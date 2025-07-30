@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: consumer                 
-          image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/news-consumer:d1875b0
+          image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/news-consumer:c3dfd8c
           imagePullPolicy: Always
           ports:
           - containerPort: 8002
@@ -38,7 +38,7 @@ spec:
             - name: DD_ENV
               value: prod
             - name: DD_VERSION
-              value: "d1875b0"
+              value: "c3dfd8c"
             - name: PYTHONPATH
               value: "/opt/datadog/apm/library/python/ddtrace_pkgs/site-packages-ddtrace-py3.10-manylinux2014"
             - name: DD_DATA_STREAMS_ENABLED
@@ -56,7 +56,7 @@ spec:
             - name: DD_GIT_REPOSITORY_URL
               value: "github.com/jungyoungseok/bitsfeed"
             - name: DD_GIT_COMMIT_SHA
-              value: "d1875b06f368e3868a91ebb43296a475d0e6fef0"
+              value: "c3dfd8c02c39a109c2c3c1efb7916c307da0ce01"
             - name: DD_DYNAMIC_INSTRUMENTATION_ENABLED
               value: "true"
             - name: DD_CODE_ORIGIN_FOR_SPANS_ENABLED
