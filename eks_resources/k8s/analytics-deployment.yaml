@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: datadog-analytics
-  namespace: default
 spec:
   replicas: 1
   selector:
@@ -17,7 +16,7 @@ spec:
     spec:
       containers:
       - name: datadog-analytics
-        image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/datadog-analytics:cdb7039
+        image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/datadog-analytics:c3dfd8c
         imagePullPolicy: Always
         ports:
         - containerPort: 8001
@@ -27,7 +26,7 @@ spec:
         - name: DD_ENV
           value: prod
         - name: DD_VERSION
-          value: latest
+          value: c3dfd8c
         - name: DD_PROFILING_ENABLED
           value: "true"
         - name: DD_LOGS_INJECTION
@@ -35,24 +34,13 @@ spec:
         - name: DD_GIT_REPOSITORY_URL
           value: "github.com/jungyoungseok/bitsfeed"
         - name: DD_GIT_COMMIT_SHA
-          value: "cdb7039"
+          value: "c3dfd8c02c39a109c2c3c1efb7916c307da0ce01"
         - name: DD_APPSEC_ENABLED
           value: "true"
         - name: DD_IAST_ENABLED
           value: "true"
         - name: DD_APPSEC_SCA_ENABLED
           value: "true"
-        - name: DD_DYNAMIC_INSTRUMENTATION_ENABLED
-          value: "true"
-        - name: DD_CODE_ORIGIN_FOR_SPANS_ENABLED
-          value: "true"          
-        - name: MONGO_URI
-          valueFrom:
-            secretKeyRef:
-              name: datadog-secrets
-              key: mongo-uri
-        - name: PORT
-          value: "8001"
         resources:
           requests:
             cpu: "200m"
@@ -60,30 +48,15 @@ spec:
           limits:
             cpu: "1000m"
             memory: "2Gi"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8001
-          initialDelaySeconds: 30
-          periodSeconds: 30
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 8001
-          initialDelaySeconds: 10
-          periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: datadog-analytics
-  namespace: default
 spec:
   selector:
     app: datadog-analytics
   ports:
   - port: 8001
     targetPort: 8001
-    protocol: TCP
-    name: http
-  type: ClusterIP 
+  type: ClusterIP
