@@ -217,4 +217,7 @@ Datadog에서 확인 가능한 메트릭:
 
 ---
 
-🚀 **이 샘플 프로젝트는 .NET Core 애플리케이션의 Datadog APM 통합을 완벽하게 검증할 수 있도록 설계되었습니다!** 
+🚀 **이 샘플 프로젝트는 .NET Core 애플리케이션의 Datadog APM 통합을 완벽하게 검증할 수 있도록 설계되었습니다!**
+
+### 📝 **최근 업데이트**
+- 2025-01-30: GitHub Actions build-dotnet job ARM64 호환성 개선 
