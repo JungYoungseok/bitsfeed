@@ -27,8 +27,10 @@ app.include_router(visualization_router, prefix="/viz")
 def root():
     return {
         "service": "Datadog Analytics Service",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "description": "키워드 분석 및 시각화 전용 마이크로서비스",
+        "build_info": "GitHub Actions Build Test 📊",
+        "last_updated": "2024-01-30",
         "endpoints": {
             "analytics": "/analytics/*",
             "visualization": "/viz/*",

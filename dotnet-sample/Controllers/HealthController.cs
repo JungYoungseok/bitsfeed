@@ -32,8 +32,9 @@ public class HealthController : ControllerBase
             status = "healthy",
             timestamp = DateTime.UtcNow,
             service = "dotnet-sample",
-            version = "1.0.0",
-            environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development"
+            version = "1.0.1",
+            environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development",
+            build_info = "GitHub Actions Build Test 🔧"
         });
     }
 

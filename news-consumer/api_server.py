@@ -159,8 +159,10 @@ def root():
     """루트 엔드포인트"""
     return {
         "service": "News Consumer API",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "description": "뉴스 소비자 서비스 모니터링 API",
+        "build_info": "GitHub Actions Build Test 📰",
+        "last_updated": "2024-01-30",
         "endpoints": {
             "health": "/health",
             "stats": "/stats", 

@@ -45,8 +45,10 @@ async def startup_event():
 def root():
     return {
         "service": "Datadog News Crawler",
-        "version": "1.0.0", 
+        "version": "1.0.1", 
         "description": "뉴스 크롤링 및 수집 전용 마이크로서비스",
+        "build_info": "GitHub Actions Build Test 🚀",
+        "last_updated": "2024-01-30",
         "endpoints": {
             "crawl": "/crawl",
             "news": "/news",
