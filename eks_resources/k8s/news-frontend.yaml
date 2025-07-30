@@ -35,6 +35,8 @@ spec:
               value: "http://datadog-analytics:8001"
             - name: CONSUMER_API_URL
               value: "http://news-consumer-api:8002"
+            - name: DOTNET_API_URL
+              value: "http://dotnet-sample:5000"
             - name: DD_LOGS_INJECTION
               value: "true"
             - name: DD_GIT_REPOSITORY_URL

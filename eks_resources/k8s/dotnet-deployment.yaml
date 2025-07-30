@@ -169,24 +169,21 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: dotnet-sample-external
+  name: dotnet-sample
   namespace: default
   labels:
     app: dotnet-sample
     tier: api
     component: dotnet-sample
-  annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
-    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
 spec:
   selector:
     app: dotnet-sample
   ports:
-  - port: 80
+  - port: 5000
     targetPort: 5000
     protocol: TCP
     name: http
-  type: LoadBalancer
+  type: ClusterIP
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
