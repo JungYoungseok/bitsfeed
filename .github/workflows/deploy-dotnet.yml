@@ -81,60 +81,79 @@ jobs:
           git push
         fi
 
-  # deploy-dotnet:
-  #   needs: build-dotnet
-  #   runs-on: ubuntu-latest
-  #   
-  #   permissions:
-  #     id-token: write
-  #     contents: read
-  #   
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v3
-  #     with:
-  #       token: ${{ secrets.GITHUB_TOKEN }}
-  #       ref: main
-  #
-  #   - name: Configure AWS credentials
-  #     uses: aws-actions/configure-aws-credentials@v2
-  #     with:
-  #       role-to-assume: arn:aws:iam::269622523990:role/GitHubActionsECRDeployRole
-  #       aws-region: ap-northeast-2
-  #
-  #   - name: Install kubectl
-  #     run: |
-  #       curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-  #       chmod +x kubectl
-  #       sudo mv kubectl /usr/local/bin/
-  #
-  #   - name: Update kubeconfig
-  #     run: |
-  #       aws eks update-kubeconfig --region ap-northeast-2 --name bitsfeed-cluster
-  #
-  #   - name: Deploy to Kubernetes
-  #     run: |
-  #       echo "🚀 Deploying .NET Core Sample to Kubernetes..."
-  #       
-  #       # Deploy MySQL first
-  #       kubectl apply -f ./eks_resources/k8s/mysql-deployment.yaml
-  #       
-  #       # Wait for MySQL to be ready
-  #       echo "⏳ Waiting for MySQL to be ready..."
-  #       kubectl wait --for=condition=available --timeout=300s deployment/mysql-dotnet
-  #       
-  #       # Deploy .NET Core application
-  #       kubectl apply -f ./eks_resources/k8s/dotnet-deployment.yaml
-  #       
-  #       # Wait for deployment
-  #       echo "⏳ Waiting for .NET Core deployment to be ready..."
-  #       kubectl wait --for=condition=available --timeout=300s deployment/dotnet-sample
-  #       
-  #       # Check pod status
-  #       echo "📋 Pod Status:"
-  #       kubectl get pods -l app=dotnet-sample
-  #       
-  #       echo "✅ .NET Core Sample deployment completed!"
-  
-  # NOTE: Kubernetes deployment temporarily disabled to match other services
-  # Enable when EKS cluster is properly configured 
+  deploy-dotnet:
+    needs: build-dotnet
+    runs-on: ubuntu-latest
+    
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        ref: main
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::269622523990:role/GitHubActionsECRDeployRole
+        aws-region: ap-northeast-2
+
+    - name: Install kubectl
+      run: |
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
+
+    - name: Check AWS identity and EKS clusters
+      run: |
+        echo "🔍 Checking AWS identity..."
+        aws sts get-caller-identity
+        echo "🔍 Listing available EKS clusters..."
+        aws eks list-clusters --region ap-northeast-2 || echo "⚠️ No EKS clusters found or access denied"
+
+    - name: Update kubeconfig (with error handling)
+      run: |
+        echo "🔧 Attempting to update kubeconfig for bitsfeed-cluster..."
+        if aws eks update-kubeconfig --region ap-northeast-2 --name bitsfeed-cluster; then
+          echo "✅ Kubeconfig updated successfully"
+          kubectl config current-context
+        else
+          echo "❌ Failed to update kubeconfig - cluster may not exist or insufficient permissions"
+          echo "🔍 Available clusters:"
+          aws eks list-clusters --region ap-northeast-2 || echo "No clusters accessible"
+          exit 1
+        fi
+
+    - name: Deploy to Kubernetes
+      run: |
+        echo "🚀 Deploying .NET Core Sample to Kubernetes..."
+        
+        # Check if kubectl is working
+        echo "🔍 Checking cluster connectivity..."
+        kubectl cluster-info
+        
+        # Deploy MySQL first
+        echo "📦 Deploying MySQL..."
+        kubectl apply -f ./eks_resources/k8s/mysql-deployment.yaml
+        
+        # Wait for MySQL to be ready
+        echo "⏳ Waiting for MySQL to be ready..."
+        kubectl wait --for=condition=available --timeout=300s deployment/mysql-dotnet
+        
+        # Deploy .NET Core application
+        echo "📦 Deploying .NET Core application..."
+        kubectl apply -f ./eks_resources/k8s/dotnet-deployment.yaml
+        
+        # Wait for deployment
+        echo "⏳ Waiting for .NET Core deployment to be ready..."
+        kubectl wait --for=condition=available --timeout=300s deployment/dotnet-sample
+        
+        # Check pod status
+        echo "📋 Pod Status:"
+        kubectl get pods -l app=dotnet-sample
+        
+        echo "✅ .NET Core Sample deployment completed!" 
