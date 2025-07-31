@@ -35,7 +35,7 @@ spec:
       serviceAccountName: default
       containers:
       - name: dotnet-sample
-        image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/dotnet-sample:cbad0fe
+        image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/dotnet-sample:58f365b
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
