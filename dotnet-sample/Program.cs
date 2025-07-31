@@ -63,12 +63,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowAll");
+app.UseCors("SignalRPolicy");
 app.UseAuthorization();
 app.MapControllers();
 
-// Map SignalR Hub
-app.MapHub<ChatHub>("/hub");
+// Map SignalR Hub with CORS
+app.MapHub<ChatHub>("/hub").RequireCors("SignalRPolicy");
 
 // Add real-time communication info
 Console.WriteLine("🔄 Real-time Communication Endpoints:");

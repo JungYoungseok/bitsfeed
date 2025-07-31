@@ -43,8 +43,8 @@ export default function HomePage() {
 
   return (
     <main className="max-w-3xl mx-auto p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
+      {/* Header - 타이틀만 깔끔하게 */}
+      <div className="flex items-center gap-4 mb-4">
         <Image
           src="/datadog-bits.png"
           alt="Datadog Bits"
@@ -52,46 +52,52 @@ export default function HomePage() {
           height={40}
         />
         <h1 className="text-3xl font-bold text-purple-700">Datadog 뉴스 피드</h1>
-        </div>
-        
-        {/* 분석 도구 및 서비스 모니터링 링크 */}
-        <div className="flex gap-2">
-          <Link
-            href="/api/analytics/viz/dashboard"
-            target="_blank"
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm flex items-center gap-2"
-          >
-            🔍 키워드 분석
-          </Link>
-          <Link
-            href="/api/analytics/viz/simple"
-            target="_blank"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm flex items-center gap-2"
-          >
-            📊 간단 차트
-          </Link>
-          <Link
-            href="/api/consumer/status"
-            target="_blank"
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm flex items-center gap-2"
-          >
-            🔧 Consumer 상태
-          </Link>
-          <Link
-            href="/api/dotnet/health"
-            target="_blank"
-            className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium text-sm flex items-center gap-2"
-          >
-            🚀 .NET Health
-          </Link>
-          <Link
-            href="/api/dotnet/users"
-            target="_blank"
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm flex items-center gap-2"
-          >
-            👥 .NET Users
-          </Link>
-        </div>
+      </div>
+      
+      {/* Service Buttons - 별도 행에 배치 */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        <Link
+          href="/realtime-test.html"
+          target="_blank"
+          className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium text-sm flex items-center gap-2"
+        >
+          🔄 실시간 통신 테스트
+        </Link>
+        <Link
+          href="/api/analytics/viz/dashboard"
+          target="_blank"
+          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm flex items-center gap-2"
+        >
+          🔍 키워드 분석
+        </Link>
+        <Link
+          href="/api/analytics/viz/simple"
+          target="_blank"
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm flex items-center gap-2"
+        >
+          📊 간단 차트
+        </Link>
+        <Link
+          href="/api/consumer/status"
+          target="_blank"
+          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm flex items-center gap-2"
+        >
+          🔧 Consumer 상태
+        </Link>
+        <Link
+          href="/api/dotnet/health"
+          target="_blank"
+          className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium text-sm flex items-center gap-2"
+        >
+          🚀 .NET Health
+        </Link>
+        <Link
+          href="/api/dotnet/users"
+          target="_blank"
+          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm flex items-center gap-2"
+        >
+          👥 .NET Users
+        </Link>
       </div>
 
       <input

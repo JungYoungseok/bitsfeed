@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-time Communication Test (via Frontend Proxy)</title>
+    <script src="https://unpkg.com/@microsoft/signalr@latest/dist/browser/signalr.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { border: 1px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 5px; }
+        .log { background: #f0f0f0; padding: 10px; height: 200px; overflow-y: scroll; font-family: monospace; }
+        button { padding: 8px 15px; margin: 5px; }
+        input { padding: 5px; margin: 5px; width: 300px; }
+        .timestamp { color: #666; font-size: 0.9em; }
+        .proxy-info { background: #e3f2fd; padding: 10px; border-radius: 5px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="proxy-info">
+        <h3>🔄 Frontend Proxy Architecture</h3>
+        <p><strong>Request Flow:</strong> Browser → news-frontend:3000 → dotnet-sample:5000</p>
+        <p><strong>All API calls</strong> go through <code>/api/dotnet/*</code> proxy endpoints</p>
+    </div>
+
+    <h1>🔄 Real-time Communication Test</h1>
+    <p>This page tests different real-time patterns to understand the <strong>GET /hub</strong> long execution times seen in Datadog APM.</p>
+    <p><strong>✨ Now using Frontend Proxy Architecture!</strong></p>
+
+    <!-- SignalR Test -->
+    <div class="section">
+        <h2>📱 SignalR Hub Test (via Proxy)</h2>
+        <button onclick="connectSignalR()">Connect to Hub</button>
+        <button onclick="disconnectSignalR()">Disconnect</button>
+        <button onclick="sendHeartbeat()">Send Heartbeat</button>
+        <div id="signalr-log" class="log"></div>
+    </div>
+
+    <!-- Long Polling Test -->
+    <div class="section">
+        <h2>⏳ Long Polling Test (via Proxy)</h2>
+        <input type="number" id="timeout" value="30" placeholder="Timeout (seconds)" />
+        <button onclick="startLongPolling()">Start Long Polling</button>
+        <button onclick="stopLongPolling()">Stop</button>
+        <br>
+        <input type="text" id="message" placeholder="Message to send" />
+        <button onclick="sendMessage()">Send Message</button>
+        <div id="longpoll-log" class="log"></div>
+    </div>
+
+    <!-- Server-Sent Events Test -->
+    <div class="section">
+        <h2>📡 Server-Sent Events Test (via Proxy)</h2>
+        <input type="number" id="sse-duration" value="30" placeholder="Duration (seconds)" />
+        <button onclick="startSSE()">Start SSE Stream</button>
+        <button onclick="stopSSE()">Stop SSE</button>
+        <div id="sse-log" class="log"></div>
+    </div>
+
+    <!-- Hub Simulation Test -->
+    <div class="section">
+        <h2>🔄 Hub Simulation Test (Recreate APM Pattern)</h2>
+        <input type="number" id="delay" value="60" placeholder="Delay (seconds)" />
+        <button onclick="simulateHub()">Simulate /hub Delay</button>
+        <div id="hub-log" class="log"></div>
+    </div>
+
+    <script>
+        // ✨ Updated to use Frontend Proxy endpoints
+        const API_BASE = '/api/dotnet/realtime';
+        const HUB_URL = 'http://localhost:5000/hub'; // SignalR Hub direct connection (WebSocket)
+        
+        let connection = null;
+        let longPollAbortController = null;
+        let eventSource = null;
+
+        function log(elementId, message, type = 'info') {
+            const logElement = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const colorMap = {
+                'info': '#333',
+                'success': '#4CAF50',
+                'error': '#F44336',
+                'warning': '#FF9800'
+            };
+            
+            logElement.innerHTML += `<div style="color: ${colorMap[type]}">
+                <span class="timestamp">[${timestamp}]</span> ${message}
+            </div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // SignalR Functions (via Frontend Proxy)
+        async function connectSignalR() {
+            try {
+                connection = new signalR.HubConnectionBuilder()
+                    .withUrl(HUB_URL, {
+                        withCredentials: true,
+                        transport: signalR.HttpTransportType.WebSockets
+                    })
+                    .configureLogging(signalR.LogLevel.Information)
+                    .build();
+
+                connection.on("UserJoined", (message) => {
+                    log('signalr-log', `👤 ${message}`, 'info');
+                });
+
+                connection.on("ReceiveMessage", (user, message) => {
+                    log('signalr-log', `💬 ${user}: ${message}`, 'info');
+                });
+
+                connection.on("Heartbeat", (timestamp) => {
+                    log('signalr-log', `💓 Heartbeat: ${timestamp}`, 'success');
+                });
+
+                await connection.start();
+                log('signalr-log', "✅ Connected to SignalR Hub (direct WebSocket)", 'success');
+                
+                // Join a test room
+                await connection.invoke("JoinRoom", "testroom");
+                
+            } catch (err) {
+                log('signalr-log', `❌ SignalR Error: ${err}`, 'error');
+            }
+        }
+
+        async function disconnectSignalR() {
+            if (connection) {
+                await connection.stop();
+                log('signalr-log', "🔌 Disconnected from SignalR Hub", 'warning');
+            }
+        }
+
+        async function sendHeartbeat() {
+            if (connection && connection.state === signalR.HubConnectionState.Connected) {
+                await connection.invoke("SendHeartbeat");
+            } else {
+                log('signalr-log', "❌ Not connected to hub", 'error');
+            }
+        }
+
+        // Long Polling Functions (via Frontend Proxy)
+        async function startLongPolling() {
+            const timeout = document.getElementById('timeout').value;
+            longPollAbortController = new AbortController();
+            
+            log('longpoll-log', `🔄 Starting long polling via proxy (timeout: ${timeout}s)...`, 'info');
+            
+            try {
+                const startTime = Date.now();
+                const response = await fetch(`${API_BASE}/long-polling?timeoutSeconds=${timeout}`, {
+                    signal: longPollAbortController.signal
+                });
+                const data = await response.json();
+                const duration = (Date.now() - startTime) / 1000;
+                
+                log('longpoll-log', `✅ Long polling completed in ${duration.toFixed(1)}s`, 'success');
+                log('longpoll-log', `📋 Messages: ${JSON.stringify(data.messages)}`, 'info');
+                
+            } catch (err) {
+                if (err.name === 'AbortError') {
+                    log('longpoll-log', "⏹️ Long polling stopped by user", 'warning');
+                } else {
+                    log('longpoll-log', `❌ Long polling error: ${err}`, 'error');
+                }
+            }
+        }
+
+        function stopLongPolling() {
+            if (longPollAbortController) {
+                longPollAbortController.abort();
+            }
+        }
+
+        async function sendMessage() {
+            const message = document.getElementById('message').value;
+            if (!message) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/message`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                const data = await response.json();
+                log('longpoll-log', `📨 Message sent via proxy: "${message}" (total: ${data.messageCount})`, 'success');
+                document.getElementById('message').value = '';
+            } catch (err) {
+                log('longpoll-log', `❌ Send message error: ${err}`, 'error');
+            }
+        }
+
+        // Server-Sent Events Functions (via Frontend Proxy)
+        function startSSE() {
+            const duration = document.getElementById('sse-duration').value;
+            
+            if (eventSource) {
+                eventSource.close();
+            }
+            
+            log('sse-log', `📡 Starting SSE stream via proxy (duration: ${duration}s)...`, 'info');
+            
+            eventSource = new EventSource(`/api/dotnet-sse/realtime/sse?durationSeconds=${duration}`);
+            
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                log('sse-log', `📊 ${data.message} (elapsed: ${data.elapsed.toFixed(1)}s)`, 'info');
+            };
+            
+            eventSource.onerror = function(event) {
+                log('sse-log', "❌ SSE error or stream ended", 'error');
+                eventSource.close();
+            };
+        }
+
+        function stopSSE() {
+            if (eventSource) {
+                eventSource.close();
+                log('sse-log', "⏹️ SSE stream stopped", 'warning');
+            }
+        }
+
+        // Hub Simulation Functions (via Frontend Proxy)
+        async function simulateHub() {
+            const delay = document.getElementById('delay').value;
+            
+            log('hub-log', `🔄 Starting hub simulation via proxy (${delay}s delay) - similar to APM trace...`, 'info');
+            
+            try {
+                const startTime = Date.now();
+                const response = await fetch(`${API_BASE}/hub?delaySeconds=${delay}`);
+                const data = await response.json();
+                const actualDuration = (Date.now() - startTime) / 1000;
+                
+                log('hub-log', `✅ Hub simulation completed via proxy!`, 'success');
+                log('hub-log', `⏱️ Requested: ${delay}s, Actual: ${actualDuration.toFixed(1)}s`, 'info');
+                log('hub-log', `📋 Response: ${JSON.stringify(data)}`, 'info');
+                
+            } catch (err) {
+                log('hub-log', `❌ Hub simulation error: ${err}`, 'error');
+            }
+        }
+
+        // Quick test function (via Frontend Proxy)
+        async function quickTest() {
+            try {
+                const startTime = Date.now();
+                const response = await fetch(`${API_BASE}/quick`);
+                const data = await response.json();
+                const duration = Date.now() - startTime;
+                
+                console.log(`⚡ Quick response via proxy: ${duration}ms`, data);
+            } catch (err) {
+                console.error('Quick test error:', err);
+            }
+        }
+
+        // Auto-run quick test on load
+        window.onload = function() {
+            quickTest();
+            log('signalr-log', "🔄 SignalR Hub Test Ready (via Frontend Proxy)", 'info');
+            log('longpoll-log', "⏳ Long Polling Test Ready (via Frontend Proxy)", 'info');
+            log('sse-log', "📡 Server-Sent Events Test Ready (via Frontend Proxy)", 'info');
+            log('hub-log', "🔄 Hub Simulation Test Ready (via Frontend Proxy)", 'info');
+        };
+    </script>
+</body>
+</html>
