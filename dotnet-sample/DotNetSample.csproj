@@ -21,8 +21,7 @@
     <!-- Additional packages -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     
-    <!-- Real-time Communication -->
-    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="8.0.11" />
+    <!-- SignalR is included in ASP.NET Core 8.0 by default -->
   </ItemGroup>
 
 </Project> 
