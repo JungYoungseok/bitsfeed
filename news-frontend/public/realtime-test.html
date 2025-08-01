@@ -63,9 +63,21 @@
     </div>
 
     <script>
-        // ✨ Updated to use Frontend Proxy endpoints
+        // ✨ Environment-aware configuration
         const API_BASE = '/api/dotnet/realtime';
-        const HUB_URL = 'http://localhost:5000/hub'; // SignalR Hub direct connection (WebSocket)
+        
+        // Dynamic HUB_URL based on environment
+        const isProduction = window.location.hostname !== 'localhost';
+        const HUB_URL_PRIMARY = isProduction 
+            ? 'https://bitsfeed.jacky.click/api/dotnet/hub'  // Production: through frontend proxy
+            : 'http://localhost:5000/hub';  // Development: direct connection
+        
+        // Fallback URL for production if proxy doesn't support WebSocket
+        const HUB_URL_FALLBACK = isProduction 
+            ? 'wss://bitsfeed.jacky.click:5000/hub'  // Direct WebSocket connection
+            : null;
+        
+        let HUB_URL = HUB_URL_PRIMARY;
         
         let connection = null;
         let longPollAbortController = null;
@@ -87,38 +99,57 @@
             logElement.scrollTop = logElement.scrollHeight;
         }
 
-        // SignalR Functions (via Frontend Proxy)
+        // SignalR Functions with fallback support
         async function connectSignalR() {
+            log('signalr-log', `🔗 Attempting connection to: ${HUB_URL}`, 'info');
+            
             try {
-                connection = new signalR.HubConnectionBuilder()
-                    .withUrl(HUB_URL, {
-                        withCredentials: true,
-                        transport: signalR.HttpTransportType.WebSockets
-                    })
-                    .configureLogging(signalR.LogLevel.Information)
-                    .build();
-
-                connection.on("UserJoined", (message) => {
-                    log('signalr-log', `👤 ${message}`, 'info');
-                });
-
-                connection.on("ReceiveMessage", (user, message) => {
-                    log('signalr-log', `💬 ${user}: ${message}`, 'info');
-                });
-
-                connection.on("Heartbeat", (timestamp) => {
-                    log('signalr-log', `💓 Heartbeat: ${timestamp}`, 'success');
-                });
-
-                await connection.start();
-                log('signalr-log', "✅ Connected to SignalR Hub (direct WebSocket)", 'success');
+                await attemptConnection(HUB_URL);
+            } catch (primaryError) {
+                log('signalr-log', `❌ Primary connection failed: ${primaryError.message}`, 'error');
                 
-                // Join a test room
-                await connection.invoke("JoinRoom", "testroom");
-                
-            } catch (err) {
-                log('signalr-log', `❌ SignalR Error: ${err}`, 'error');
+                // Try fallback URL if available
+                if (HUB_URL_FALLBACK && HUB_URL !== HUB_URL_FALLBACK) {
+                    log('signalr-log', `🔄 Trying fallback: ${HUB_URL_FALLBACK}`, 'warning');
+                    try {
+                        HUB_URL = HUB_URL_FALLBACK;
+                        await attemptConnection(HUB_URL);
+                    } catch (fallbackError) {
+                        log('signalr-log', `❌ Fallback connection also failed: ${fallbackError.message}`, 'error');
+                        throw fallbackError;
+                    }
+                } else {
+                    throw primaryError;
+                }
             }
+        }
+
+        async function attemptConnection(hubUrl) {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl(hubUrl, {
+                    withCredentials: true,
+                    transport: signalR.HttpTransportType.WebSockets
+                })
+                .configureLogging(signalR.LogLevel.Information)
+                .build();
+
+            connection.on("UserJoined", (message) => {
+                log('signalr-log', `👤 ${message}`, 'info');
+            });
+
+            connection.on("ReceiveMessage", (user, message) => {
+                log('signalr-log', `💬 ${user}: ${message}`, 'info');
+            });
+
+            connection.on("Heartbeat", (timestamp) => {
+                log('signalr-log', `💓 Heartbeat: ${timestamp}`, 'success');
+            });
+
+            await connection.start();
+            log('signalr-log', `✅ Connected to SignalR Hub: ${hubUrl}`, 'success');
+            
+            // Join a test room
+            await connection.invoke("JoinRoom", "testroom");
         }
 
         async function disconnectSignalR() {

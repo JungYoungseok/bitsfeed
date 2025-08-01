@@ -47,7 +47,12 @@ builder.Services.AddCors(options =>
     // Specific policy for SignalR (credentials require specific origins)
     options.AddPolicy("SignalRPolicy", builder =>
     {
-        builder.WithOrigins("http://localhost:3000", "http://localhost:5000", "https://localhost:5001")
+        builder.WithOrigins(
+                   "http://localhost:3000", 
+                   "http://localhost:5000", 
+                   "https://localhost:5001",
+                   "https://bitsfeed.jacky.click"  // Production domain
+               )
                .AllowAnyMethod()
                .AllowAnyHeader()
                .AllowCredentials();
