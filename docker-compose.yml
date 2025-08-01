@@ -23,6 +23,7 @@ services:
       - DD_APPSEC_SCA_ENABLED=true
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - DD_DATA_STREAMS_ENABLED=true
+      - DD_EXCEPTION_REPLAY_ENABLED=true
     networks:
       - bitsfeed-net
     depends_on:
@@ -51,6 +52,7 @@ services:
       - DD_GIT_REPOSITORY_URL="github.com/jungyoungseok/bitsfeed
       - DD_IAST_ENABLED=true
       - DD_APPSEC_SCA_ENABLED=true
+      - DD_EXCEPTION_REPLAY_ENABLED=true
     networks:
       - bitsfeed-net
     depends_on:
@@ -199,6 +201,7 @@ services:
       - DD_RUNTIME_METRICS_ENABLED=true
       - DD_APPSEC_ENABLED=true
       - DD_TRACE_SAMPLE_RATE=1.0
+      - DD_EXCEPTION_REPLAY_ENABLED=true
     networks:
       - bitsfeed-net
     depends_on:

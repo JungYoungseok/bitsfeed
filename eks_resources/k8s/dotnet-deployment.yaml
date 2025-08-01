@@ -88,6 +88,8 @@ spec:
           value: "true"
         - name: DD_DATA_STREAMS_ENABLED
           value: "true"
+        - name: DD_EXCEPTION_REPLAY_ENABLED
+          value: "true"
         
         # Security and Performance
         - name: DOTNET_RUNNING_IN_CONTAINER

@@ -41,6 +41,8 @@ spec:
           value: "true"
         - name: DD_APPSEC_SCA_ENABLED
           value: "true"
+        - name: DD_EXCEPTION_REPLAY_ENABLED
+          value: "true"
         resources:
           requests:
             cpu: "200m"
