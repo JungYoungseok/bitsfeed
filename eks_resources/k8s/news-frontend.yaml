@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: news-frontend
-          image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/news-frontend:c23b9c5
+          image: 269622523990.dkr.ecr.ap-northeast-2.amazonaws.com/news-frontend:e656fb0
           imagePullPolicy: Always
           ports:
           - containerPort: 3000
@@ -26,7 +26,7 @@ spec:
             - name: DD_ENV
               value: prod
             - name: DD_VERSION
-              value: c23b9c5
+              value: e656fb0
             - name: DD_PROFILING_ENABLED
               value: "true"
             - name: NEWS_API_URL
@@ -42,7 +42,7 @@ spec:
             - name: DD_GIT_REPOSITORY_URL
               value: "github.com/jungyoungseok/bitsfeed"
             - name: DD_GIT_COMMIT_SHA
-              value: "c23b9c5741f3e120a4cd68434ec40a9345ab7a5d"
+              value: "e656fb0b51e0e6af1dee42f62604b1bcf282d727"
             - name: DD_APPSEC_ENABLED
               value: "true"
             - name: DD_IAST_ENABLED
