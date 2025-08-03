@@ -45,8 +45,8 @@ export default function HomePage() {
   const handleKafkaTest = async () => {
     setIsKafkaTestRunning(true);
     try {
-      // 직접 백엔드 API 호출 (프록시 우회)
-      const response = await fetch("http://localhost:8000/kafka-test", {
+      // 프록시 API 호출 (Production 환경 대응)
+      const response = await fetch("/api/kafka-test", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

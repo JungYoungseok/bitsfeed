@@ -58,7 +58,7 @@ export default function MysqlDataPage() {
   // Kafka 테스트 실행
   const handleKafkaTest = async () => {
     try {
-      const response = await fetch("http://localhost:8000/kafka-test", {
+      const response = await fetch("/api/kafka-test", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
