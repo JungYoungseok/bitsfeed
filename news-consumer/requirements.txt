@@ -1,6 +1,6 @@
 openai==0.28
 pymongo
-confluent-kafka
+confluent-kafka==2.11.0
 python-dateutil
 fastapi
 uvicorn
