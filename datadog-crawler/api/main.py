@@ -113,3 +113,85 @@ def get_scheduler_status():
         }
     else:
         return {"status": "stopped", "message": "Scheduler is not running"}
+
+@app.post("/kafka-test")
+def start_kafka_test():
+    """Datadog Data Streams Monitoring 테스트를 위한 Kafka Producer"""
+    import threading
+    import time
+    import uuid
+    from datetime import datetime
+    from confluent_kafka import Producer
+    import os
+    import json
+    
+    def kafka_test_producer():
+        """1분 동안 2-3초마다 테스트 메시지를 전송하는 producer"""
+        producer = Producer({
+            'bootstrap.servers': os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"),
+            'client.id': 'datadog-test-producer'
+        })
+        
+        def delivery_report(err, msg):
+            if err is not None:
+                print(f'❌ Message delivery failed: {err}')
+            else:
+                print(f'✅ Test message delivered to {msg.topic()} [{msg.partition()}]')
+        
+        # 1분 동안 (60초) 3초 간격으로 20개 메시지 전송
+        start_time = datetime.now()
+        message_count = 0
+        
+        try:
+            while (datetime.now() - start_time).seconds < 60:
+                message_count += 1
+                test_message = {
+                    "_id": f"test_{uuid.uuid4().hex[:8]}",
+                    "title": f"📊 Data Streams Monitoring Test Message #{message_count}",
+                    "link": f"https://test.datadog.com/test-{message_count}",
+                    "source": "Datadog Test Producer",
+                    "published": datetime.now().isoformat(),
+                    "content": f"This is a test message for Datadog Data Streams Monitoring. Message #{message_count} sent at {datetime.now().strftime('%H:%M:%S')}",
+                    "test_metadata": {
+                        "test_type": "data_streams_monitoring",
+                        "message_id": message_count,
+                        "producer": "datadog-crawler",
+                        "consumer": "news-consumer",
+                        "target_table": "kafka_test_logs"
+                    }
+                }
+                
+                producer.produce(
+                    'news_raw',
+                    key=f"test-{message_count}",
+                    value=json.dumps(test_message),
+                    callback=delivery_report
+                )
+                
+                producer.poll(0)  # Trigger any available delivery report callbacks
+                print(f"🚀 Sent test message #{message_count} at {datetime.now().strftime('%H:%M:%S')}")
+                
+                time.sleep(3)  # 3초 대기
+                
+        except Exception as e:
+            print(f"❌ Kafka test producer error: {e}")
+        finally:
+            producer.flush()  # Wait for all messages to be delivered
+            print(f"✅ Kafka test completed. Sent {message_count} messages.")
+    
+    # 백그라운드에서 producer 실행
+    producer_thread = threading.Thread(target=kafka_test_producer, daemon=True)
+    producer_thread.start()
+    
+    return {
+        "message": "🚀 Kafka Data Streams Monitoring 테스트가 시작되었습니다.",
+        "details": {
+            "duration": "60초",
+            "interval": "3초마다",
+            "topic": "news_raw",
+            "expected_messages": "약 20개",
+            "producer": "datadog-crawler",
+            "consumer": "news-consumer"
+        },
+        "monitoring": "Datadog Data Streams Monitoring에서 실시간 데이터 플로우를 확인하세요."
+    }

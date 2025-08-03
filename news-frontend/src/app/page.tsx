@@ -9,6 +9,7 @@ export default function HomePage() {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isKafkaTestRunning, setIsKafkaTestRunning] = useState(false);
 
   const pageSize = 5;
   useEffect(() => {
@@ -40,6 +41,42 @@ export default function HomePage() {
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
+
+  const handleKafkaTest = async () => {
+    setIsKafkaTestRunning(true);
+    try {
+      const response = await fetch("/api/proxy", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          method: "POST",
+          url: `${process.env.NEXT_PUBLIC_CRAWLER_URL || 'http://datadog-crawler:8000'}/kafka-test`,
+          data: {
+            testType: "dataStreamsMonitoring",
+            duration: 60,
+            interval: 3
+          }
+        }),
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        alert(`✅ Kafka 테스트 시작됨!\n${result.message || 'Producer가 1분간 메시지를 전송합니다.'}`);
+      } else {
+        alert("❌ Kafka 테스트 시작 실패");
+      }
+    } catch (error) {
+      console.error("Kafka test error:", error);
+      alert("❌ 네트워크 오류로 테스트를 시작할 수 없습니다.");
+    } finally {
+      // 1분 후 버튼 활성화
+      setTimeout(() => {
+        setIsKafkaTestRunning(false);
+      }, 60000);
+    }
+  };
 
   return (
     <main className="max-w-3xl mx-auto p-6">
@@ -98,6 +135,17 @@ export default function HomePage() {
         >
           👥 .NET Users
         </Link>
+        <button
+          onClick={handleKafkaTest}
+          disabled={isKafkaTestRunning}
+          className={`px-4 py-2 text-white rounded-lg transition-colors font-medium text-sm flex items-center gap-2 ${
+            isKafkaTestRunning 
+              ? 'bg-gray-500 cursor-not-allowed' 
+              : 'bg-indigo-600 hover:bg-indigo-700'
+          }`}
+        >
+          {isKafkaTestRunning ? '🔄 테스트 중...' : '🚀 Kafka 테스트'}
+        </button>
       </div>
 
       <input

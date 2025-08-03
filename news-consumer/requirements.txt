@@ -4,3 +4,4 @@ confluent-kafka==2.11.0
 python-dateutil
 fastapi
 uvicorn
+mysql-connector-python

@@ -16,12 +16,17 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from api_server import stats, start_api_server
 
 from utils import build_prompt, call_openai, save_summary_to_mongo
+from mysql_utils import create_kafka_test_table, save_test_message_to_mysql
 
 def run_summary_consumer():
     print("🚀 News Consumer Summary Service Starting... (GitHub Actions Test - v2024.1.20)")
     
     # 통계 상태 업데이트
     stats.set_consumer_status(True)
+    
+    # MySQL 테스트 테이블 초기화
+    print("📊 Initializing MySQL test table...")
+    create_kafka_test_table()
     
     openai.api_key = os.getenv("OPENAI_API_KEY")
     mongo = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017"))
@@ -65,14 +70,28 @@ def run_summary_consumer():
                 try:                    
                     article = json.loads(msg.value().decode('utf-8'))
                     print("Message 확인: ", article)
-                    article_id = article.get('_id') or hashlib.md5(article['link'].encode()).hexdigest()
-                    prompt = build_prompt(article)
-                    summary = call_openai(prompt)
-                    save_summary_to_mongo(collection, article_id, summary)
                     
-                    # 통계 업데이트
-                    stats.update_processed(article, summary)
-                    print(f"✅ 처리 완료 - 총 {stats.total_processed}개 처리됨")
+                    # 테스트 메시지 감지 및 MySQL 저장
+                    if 'test_metadata' in article and article.get('test_metadata', {}).get('test_type') == 'data_streams_monitoring':
+                        print("🧪 Test message detected for Data Streams Monitoring")
+                        if save_test_message_to_mysql(article):
+                            print("✅ Test message saved to MySQL successfully")
+                        else:
+                            print("❌ Failed to save test message to MySQL")
+                        
+                        # 통계 업데이트 (테스트 메시지도 처리 카운트에 포함)
+                        stats.update_processed(article, {"summary_ko": "Test message processed", "impact_ko": "Monitoring test"})
+                        print(f"✅ 테스트 메시지 처리 완료 - 총 {stats.total_processed}개 처리됨")
+                    else:
+                        # 일반 뉴스 메시지 처리
+                        article_id = article.get('_id') or hashlib.md5(article['link'].encode()).hexdigest()
+                        prompt = build_prompt(article)
+                        summary = call_openai(prompt)
+                        save_summary_to_mongo(collection, article_id, summary)
+                        
+                        # 통계 업데이트
+                        stats.update_processed(article, summary)
+                        print(f"✅ 일반 뉴스 처리 완료 - 총 {stats.total_processed}개 처리됨")
                     
                 except Exception as e:
                     print(f"❗ 처리 중 오류 발생: {e}")

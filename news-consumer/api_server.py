@@ -7,6 +7,7 @@ from typing import Dict, List, Optional
 import json
 import os
 from pymongo import MongoClient
+from mysql_utils import get_test_message_count
 
 # 글로벌 상태 관리 클래스
 class ConsumerStats:
@@ -154,6 +155,67 @@ def test_mongo_connection():
             "error": str(e)
         }
 
+@app.get("/mysql-test")
+def test_mysql_connection():
+    """MySQL 연결 테스트 및 테스트 데이터 조회"""
+    try:
+        from mysql_utils import get_mysql_connection
+        
+        connection = get_mysql_connection()
+        if connection is None:
+            return {
+                "status": "error",
+                "error": "MySQL 연결 실패"
+            }
+        
+        cursor = connection.cursor()
+        
+        # 테스트 테이블 존재 확인
+        cursor.execute("SHOW TABLES LIKE 'kafka_test_logs'")
+        table_exists = cursor.fetchone() is not None
+        
+        # 테스트 메시지 개수 조회
+        test_count = 0
+        latest_messages = []
+        
+        if table_exists:
+            cursor.execute("SELECT COUNT(*) FROM kafka_test_logs")
+            test_count = cursor.fetchone()[0]
+            
+            # 최근 5개 메시지 조회
+            cursor.execute("""
+                SELECT message_id, title, source, received_at, test_metadata 
+                FROM kafka_test_logs 
+                ORDER BY received_at DESC 
+                LIMIT 5
+            """)
+            
+            for row in cursor.fetchall():
+                latest_messages.append({
+                    "message_id": row[0],
+                    "title": row[1],
+                    "source": row[2],
+                    "received_at": row[3].isoformat() if row[3] else None,
+                    "test_metadata": row[4]
+                })
+        
+        cursor.close()
+        connection.close()
+        
+        return {
+            "status": "connected",
+            "database": "dotnet_sample",
+            "table_exists": table_exists,
+            "test_message_count": test_count,
+            "latest_messages": latest_messages
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e)
+        }
+
 @app.get("/")
 def root():
     """루트 엔드포인트"""
@@ -168,7 +230,8 @@ def root():
             "stats": "/stats", 
             "recent-summaries": "/recent-summaries",
             "status": "/status",
-            "mongo-test": "/mongo-test"
+            "mongo-test": "/mongo-test",
+            "mysql-test": "/mysql-test"
         },
         "documentation": "/docs"
     }
