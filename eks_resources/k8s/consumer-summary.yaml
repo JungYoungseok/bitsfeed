@@ -35,6 +35,8 @@ spec:
                 secretKeyRef:
                   name: datadog-secrets
                   key: kafka-uri
+            - name: DD_SERVICE
+              value: news-consumer
             - name: DD_ENV
               value: prod
             - name: DD_VERSION
