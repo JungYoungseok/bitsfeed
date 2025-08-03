@@ -138,12 +138,12 @@ def start_kafka_test():
             else:
                 print(f'✅ Test message delivered to {msg.topic()} [{msg.partition()}]')
         
-        # 1분 동안 (60초) 3초 간격으로 20개 메시지 전송
+        # 30초 동안 3초 간격으로 10개 메시지 전송
         start_time = datetime.now()
         message_count = 0
         
         try:
-            while (datetime.now() - start_time).seconds < 60:
+            while (datetime.now() - start_time).seconds < 30:
                 message_count += 1
                 test_message = {
                     "_id": f"test_{uuid.uuid4().hex[:8]}",
@@ -186,10 +186,10 @@ def start_kafka_test():
     return {
         "message": "🚀 Kafka Data Streams Monitoring 테스트가 시작되었습니다.",
         "details": {
-            "duration": "60초",
+            "duration": "30초",
             "interval": "3초마다",
             "topic": "news_raw",
-            "expected_messages": "약 20개",
+            "expected_messages": "약 10개",
             "producer": "datadog-crawler",
             "consumer": "news-consumer"
         },

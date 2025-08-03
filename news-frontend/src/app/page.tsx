@@ -45,25 +45,17 @@ export default function HomePage() {
   const handleKafkaTest = async () => {
     setIsKafkaTestRunning(true);
     try {
-      const response = await fetch("/api/proxy", {
+      // 직접 백엔드 API 호출 (프록시 우회)
+      const response = await fetch("http://localhost:8000/kafka-test", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          method: "POST",
-          url: `${process.env.NEXT_PUBLIC_CRAWLER_URL || 'http://datadog-crawler:8000'}/kafka-test`,
-          data: {
-            testType: "dataStreamsMonitoring",
-            duration: 60,
-            interval: 3
-          }
-        }),
+        }
       });
       
       if (response.ok) {
         const result = await response.json();
-        alert(`✅ Kafka 테스트 시작됨!\n${result.message || 'Producer가 1분간 메시지를 전송합니다.'}`);
+        alert(`✅ Kafka 테스트 시작됨!\n${result.message || 'Producer가 30초간 메시지를 전송합니다.'}\n\n상세 정보:\n- 지속시간: ${result.details?.duration}\n- 간격: ${result.details?.interval}\n- 예상 메시지: ${result.details?.expected_messages}\n\n💡 MySQL 데이터는 별도 페이지에서 확인하세요!`);
       } else {
         alert("❌ Kafka 테스트 시작 실패");
       }
@@ -71,10 +63,10 @@ export default function HomePage() {
       console.error("Kafka test error:", error);
       alert("❌ 네트워크 오류로 테스트를 시작할 수 없습니다.");
     } finally {
-      // 1분 후 버튼 활성화
+      // 30초 후 버튼 활성화
       setTimeout(() => {
         setIsKafkaTestRunning(false);
-      }, 60000);
+      }, 30000);
     }
   };
 
@@ -146,6 +138,12 @@ export default function HomePage() {
         >
           {isKafkaTestRunning ? '🔄 테스트 중...' : '🚀 Kafka 테스트'}
         </button>
+        <Link
+          href="/mysql-data"
+          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm flex items-center gap-2"
+        >
+          🗄️ MySQL 데이터 보기
+        </Link>
       </div>
 
       <input
@@ -220,6 +218,8 @@ export default function HomePage() {
         </button>
       </div>
       
+
+
       {/* Version info for workflow testing */}
       <div className="mt-8 pt-4 border-t border-gray-200 text-center">
                 <p className="text-xs text-gray-500">
