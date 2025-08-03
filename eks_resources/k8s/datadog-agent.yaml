@@ -15,6 +15,11 @@ spec:
         secretName: "datadog-secret"
         keyName: "api-key"
   features:
+    autoscaling:
+      workload:
+        enabled: true
+    eventCollection:
+      unbundleEvents: true
     apm:
       instrumentation:
         enabled: true
@@ -59,8 +64,14 @@ spec:
     liveProcessCollection:
       enabled: true
   override:
+    clusterAgent:
+      env:
+        - name: DD_AUTOSCALING_FAILOVER_ENABLED
+          value: "true"
     nodeAgent:
       env:
         # Health check 엔드포인트 trace 필터링
         - name: DD_APM_IGNORE_RESOURCES
           value: "GET /health,GET /ping,GET /_health,GET /healthz,GET /readiness,GET /liveness"
+        - name: DD_AUTOSCALING_FAILOVER_ENABLED
+          value: "true"
