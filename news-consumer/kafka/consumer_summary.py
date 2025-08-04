@@ -38,8 +38,13 @@ def run_summary_consumer():
     consumer = Consumer({
         'bootstrap.servers': os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"),
         'group.id': 'summary-consumer',
+        'client.id': 'news-consumer-client',  # Data Streams Monitoring을 위한 클라이언트 식별
         'auto.offset.reset': 'earliest',
-        'enable.auto.commit': True
+        'enable.auto.commit': True,
+        'session.timeout.ms': 10000,          # Consumer Group 세션 타임아웃
+        'heartbeat.interval.ms': 3000,        # Consumer Group heartbeat
+        'max.poll.interval.ms': 300000,       # 최대 poll 간격
+        'statistics.interval.ms': 10000,      # 통계 정보 수집 (Data Streams 관련)
     })
     print("news_raw topic subscribe")
     consumer.subscribe(['news_raw'])
@@ -47,14 +52,29 @@ def run_summary_consumer():
 
     async def poll_loop():
         print("poll_loop started")
-        # while not consumer.assignment():
-        #     consumer.poll(0.1)
-        #     await asyncio.sleep(0.1)
-        consumer.poll(0)
+        
+        # Consumer Group coordinator와 partition 할당 대기
+        print("🔄 Waiting for partition assignment...")
+        assignment_retries = 0
+        max_retries = 30  # 최대 30초 대기
+        
+        while not consumer.assignment() and assignment_retries < max_retries:
+            consumer.poll(0.1)
+            await asyncio.sleep(0.1)
+            assignment_retries += 1
+            if assignment_retries % 10 == 0:  # 1초마다 로그 출력
+                print(f"🔄 Still waiting for partition assignment... ({assignment_retries}/30)")
+        
+        final_assignment = consumer.assignment()
+        if final_assignment:
+            print("✅ Kafka partition assigned:", final_assignment)
+            # Data Streams Monitoring을 위한 추가 정보 로그
+            for tp in final_assignment:
+                print(f"📊 DSM: Topic={tp.topic}, Partition={tp.partition}, Consumer Group=summary-consumer")
+        else:
+            print("❌ Failed to get partition assignment after 30 seconds")
+            
         consumer.list_topics(timeout=5.0)
-
-        print("✅ Kafka partition assigned:", consumer.assignment())
-        print(consumer.list_topics())
         stats.set_kafka_status("connected")
 
         try:
