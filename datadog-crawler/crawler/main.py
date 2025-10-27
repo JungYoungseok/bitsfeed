@@ -13,7 +13,7 @@ def extract_bug_fixes(body_text):
     # Bug Fixes 섹션 추출
     match = re.search(r"## Bug Fixes\s*(.*?)(\n#+\s|$)", body_text, re.DOTALL)
     if not match:
-        return "No 'Bug Fixes' section found."
+        return "No 'Bug Fixes' section found.  "
 
     raw_section = match.group(1).strip()
 
